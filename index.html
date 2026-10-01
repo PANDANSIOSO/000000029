@@ -1,0 +1,2413 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐼 Panda Creator Hub</title>
+<style>
+  :root {
+    --tema: #00ff80;
+    --tema-h: 145;
+    --tema-s: 100%;
+    --tema-l: 50%;
+    --tema-escuro: hsl(var(--tema-h), var(--tema-s), calc(var(--tema-l) - 20%));
+    --tema-claro: hsl(var(--tema-h), var(--tema-s), calc(var(--tema-l) + 20%));
+    --tema-rgb: 0, 255, 128;
+    --fundo: #0a0f0a;
+    --fundo-2: #0d1520;
+    --fundo-3: #131c28;
+    --titulo-fonte: 'Segoe UI', system-ui, sans-serif;
+    --titulo-peso: 800;
+    --titulo-estilo: normal;
+    --titulo-tamanho: 1.7rem;
+    --titulo-text-shadow: 0 0 20px rgba(var(--tema-rgb), 0.5);
+    --titulo-text-fill: var(--tema);
+    --titulo-text-stroke: 0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+
+  body {
+    min-height: 100vh;
+    background: var(--fundo);
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(var(--tema-rgb), 0.12), transparent 40%),
+      radial-gradient(circle at 85% 70%, rgba(var(--tema-rgb), 0.10), transparent 45%);
+    color: #e8ffe8;
+    padding: 16px;
+    font-size: 15px;
+    transition: background 0.4s ease;
+  }
+
+  .container { max-width: 1200px; margin: 0 auto; }
+
+  .tela { display: none; }
+  .tela.active { display: block; animation: fadeIn 0.4s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============ ENGRENAGEM ============ */
+  .btn-engrenagem {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--tema), var(--tema-escuro));
+    color: #0a0f0a;
+    border: none;
+    font-size: 1.6rem;
+    cursor: pointer;
+    box-shadow: 0 0 25px rgba(var(--tema-rgb), 0.5);
+    z-index: 900;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .btn-engrenagem:hover { transform: rotate(90deg) scale(1.1); }
+
+  .painel-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 950;
+    display: none;
+  }
+  .painel-overlay.aberto { display: block; animation: fadeIn 0.3s ease; }
+
+  .painel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 400px;
+    max-width: 92vw;
+    background: var(--fundo-2);
+    border-left: 2px solid var(--tema);
+    box-shadow: -10px 0 40px rgba(0, 0, 0, 0.6);
+    z-index: 960;
+    transform: translateX(100%);
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .painel.aberto { transform: translateX(0); }
+
+  .painel-header {
+    padding: 20px;
+    border-bottom: 1px solid rgba(var(--tema-rgb), 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    position: sticky;
+    top: 0;
+    background: var(--fundo-2);
+    z-index: 2;
+  }
+  .painel-header h2 {
+    color: var(--tema);
+    font-size: 1.15rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-fechar {
+    background: rgba(var(--tema-rgb), 0.1);
+    border: 1px solid var(--tema);
+    color: var(--tema);
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.25s;
+  }
+  .btn-fechar:hover { background: var(--tema); color: #0a0f0a; }
+
+  .painel-body { padding: 20px; flex: 1; }
+
+  .painel-secao {
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px dashed rgba(var(--tema-rgb), 0.2);
+  }
+  .painel-secao:last-child { border-bottom: none; }
+
+  .painel-secao h3 {
+    color: var(--tema);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .painel label {
+    display: block;
+    color: #9fdcb0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    margin-top: 12px;
+  }
+  .painel label:first-child { margin-top: 0; }
+
+  .painel input[type="color"] {
+    width: 100%;
+    height: 45px;
+    padding: 4px;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(var(--tema-rgb), 0.3);
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  .painel input[type="range"] {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #000, var(--tema), #fff);
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+  .painel input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--tema);
+    border: 3px solid #fff;
+    box-shadow: 0 0 10px rgba(var(--tema-rgb), 0.8);
+    cursor: pointer;
+  }
+  .painel input[type="range"]::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--tema);
+    border: 3px solid #fff;
+    cursor: pointer;
+  }
+
+  .painel select {
+    width: 100%;
+    padding: 11px 14px;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(var(--tema-rgb), 0.3);
+    border-radius: 10px;
+    color: #e8ffe8;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+
+  .valor-slider {
+    color: var(--tema);
+    font-size: 0.8rem;
+    font-weight: 700;
+    float: right;
+  }
+
+  .aviso-fonte {
+    display: inline-block;
+    background: rgba(255, 200, 0, 0.15);
+    color: #ffcc00;
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    border-radius: 6px;
+    margin-left: 6px;
+    font-weight: 700;
+    vertical-align: middle;
+  }
+
+  .btn-preview-tema {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .btn-preview-tema button {
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(var(--tema-rgb), 0.3);
+    color: #d8ffe0;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+  .btn-preview-tema button:hover {
+    background: rgba(var(--tema-rgb), 0.15);
+    border-color: var(--tema);
+    color: var(--tema);
+  }
+
+  .painel-footer {
+    padding: 16px 20px;
+    border-top: 1px solid rgba(var(--tema-rgb), 0.2);
+    display: flex;
+    gap: 10px;
+    position: sticky;
+    bottom: 0;
+    background: var(--fundo-2);
+  }
+  .painel-footer button {
+    flex: 1;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .btn-aplicar {
+    background: linear-gradient(135deg, var(--tema), var(--tema-escuro));
+    color: #0a0f0a;
+    border: none;
+  }
+  .btn-aplicar:hover { box-shadow: 0 0 20px rgba(var(--tema-rgb), 0.6); }
+  .btn-restaurar {
+    background: rgba(255, 60, 60, 0.1);
+    border: 1px solid #ff3c3c;
+    color: #ff6666;
+  }
+  .btn-restaurar:hover { background: #ff3c3c; color: #fff; }
+
+  /* ============ ESTILOS DE TEXTO ============ */
+  .texto-contorno {
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 2px var(--tema);
+    text-shadow: none;
+  }
+  .texto-sombra {
+    text-shadow: 0 0 10px var(--tema), 0 0 20px var(--tema), 0 0 30px var(--tema);
+  }
+  .texto-3d {
+    text-shadow: 3px 3px 0 var(--tema-escuro), 6px 6px 0 rgba(0,0,0,0.4);
+  }
+
+  /* ============ RESTO DA UI ============ */
+  .hub-box {
+    background: var(--fundo-2);
+    border: 2px solid var(--tema);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 0 40px rgba(var(--tema-rgb), 0.25), inset 0 0 60px rgba(var(--tema-rgb), 0.03);
+    transition: all 0.4s ease;
+  }
+
+  .hub-titulo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .hub-titulo h1 {
+    font-family: var(--titulo-fonte);
+    font-weight: var(--titulo-peso);
+    font-style: var(--titulo-estilo);
+    font-size: var(--titulo-tamanho);
+    color: var(--tema);
+    letter-spacing: 1px;
+    text-shadow: var(--titulo-text-shadow);
+    transition: all 0.3s ease;
+  }
+  .hub-titulo h1.contorno {
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 2px var(--tema);
+    text-shadow: none;
+  }
+  .hub-titulo h1.sombra {
+    text-shadow: 0 0 10px var(--tema), 0 0 20px var(--tema), 0 0 30px var(--tema);
+  }
+  .hub-titulo h1.tresd {
+    text-shadow: 3px 3px 0 var(--tema-escuro), 6px 6px 0 rgba(0,0,0,0.4);
+  }
+
+  .hub-titulo .panda { font-size: 1.8rem; }
+
+  .hub-topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid rgba(var(--tema-rgb), 0.15);
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .hub-topo .label { color: #7fa887; font-size: 0.95rem; font-weight: 600; }
+
+  .btn-criar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 22px;
+    background: linear-gradient(135deg, var(--tema), var(--tema-escuro));
+    color: #0a0f0a;
+    border: none;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.25s;
+    box-shadow: 0 0 20px rgba(var(--tema-rgb), 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .btn-criar:hover { transform: translateY(-2px); box-shadow: 0 0 30px rgba(var(--tema-rgb), 0.8); }
+  .btn-criar .mais { font-size: 1.3rem; font-weight: 900; color: #0a0f0a; }
+
+  .lista-paginas { display: flex; flex-direction: column; gap: 14px; }
+
+  .pagina-card {
+    background: var(--fundo-3);
+    border-left: 5px solid var(--tema);
+    border-radius: 14px;
+    padding: 18px 20px;
+    transition: all 0.25s;
+  }
+  .pagina-card:hover { box-shadow: 0 0 25px rgba(var(--tema-rgb), 0.15); }
+
+  .pagina-nome { font-size: 1.15rem; color: var(--tema); font-weight: 800; margin-bottom: 4px; }
+  .pagina-info { color: #7fa887; font-size: 0.85rem; margin-bottom: 14px; }
+  .pagina-acoes { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .btn-acao {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 11px 20px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-editar { background: linear-gradient(135deg, #ffb300, #ff8c00); color: #1a1a1a; box-shadow: 0 0 15px rgba(255, 179, 0, 0.3); }
+  .btn-editar:hover { box-shadow: 0 0 25px rgba(255, 179, 0, 0.6); transform: translateY(-2px); }
+
+  .btn-codigo { background: linear-gradient(135deg, #2979ff, #1565c0); color: #fff; box-shadow: 0 0 15px rgba(41, 121, 255, 0.3); }
+  .btn-codigo:hover { box-shadow: 0 0 25px rgba(41, 121, 255, 0.6); transform: translateY(-2px); }
+
+  .btn-excluir { background: linear-gradient(135deg, #ff3c3c, #c62828); color: #fff; padding: 11px 14px; box-shadow: 0 0 15px rgba(255, 60, 60, 0.3); }
+  .btn-excluir:hover { box-shadow: 0 0 25px rgba(255, 60, 60, 0.6); transform: translateY(-2px); }
+
+  .vazio { text-align: center; color: #7fa887; padding: 40px 20px; font-size: 0.95rem; }
+  .vazio .emoji { font-size: 3rem; display: block; margin-bottom: 12px; opacity: 0.5; }
+
+  .topbar { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; flex-wrap: wrap; }
+
+  .btn-voltar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 18px;
+    background: rgba(var(--tema-rgb), 0.1);
+    border: 1px solid var(--tema);
+    color: var(--tema);
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+  .btn-voltar:hover { background: var(--tema); color: #0a0f0a; }
+
+  .topbar-titulo { color: var(--tema); font-weight: 800; font-size: 1.1rem; flex: 1; min-width: 200px; }
+
+  .btn-salvar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, var(--tema), var(--tema-escuro));
+    color: #0a0f0a;
+    border: none;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.25s;
+    box-shadow: 0 0 15px rgba(var(--tema-rgb), 0.4);
+  }
+  .btn-salvar:hover { box-shadow: 0 0 25px rgba(var(--tema-rgb), 0.7); transform: translateY(-2px); }
+
+  .secao {
+    background: var(--fundo-2);
+    border: 1px solid rgba(var(--tema-rgb), 0.22);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 14px;
+    transition: all 0.4s ease;
+  }
+  .secao h2 { color: var(--tema); font-size: 1.05rem; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+
+  label {
+    display: block;
+    color: #9fdcb0;
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    margin-top: 12px;
+  }
+  label:first-child { margin-top: 0; }
+
+  input[type="text"], input[type="url"], textarea, select {
+    width: 100%;
+    padding: 11px 14px;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(var(--tema-rgb), 0.25);
+    border-radius: 10px;
+    color: #e8ffe8;
+    font-size: 0.9rem;
+    font-family: inherit;
+    transition: all 0.25s;
+  }
+  input::placeholder, textarea::placeholder { color: rgba(159, 220, 176, 0.35); font-style: italic; }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: var(--tema); box-shadow: 0 0 12px rgba(var(--tema-rgb), 0.3); }
+  textarea { min-height: 90px; resize: vertical; font-family: monospace; font-size: 0.85rem; }
+
+  input[type="color"] {
+    width: 100%;
+    height: 42px;
+    padding: 4px;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(var(--tema-rgb), 0.25);
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  .check-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(var(--tema-rgb), 0.15);
+    border-radius: 10px;
+    margin-top: 8px;
+    cursor: pointer;
+    transition: all 0.25s;
+    user-select: none;
+  }
+  .check-row:hover { border-color: rgba(var(--tema-rgb), 0.4); }
+  .check-row.ativo { border-color: var(--tema); background: rgba(var(--tema-rgb), 0.08); }
+  .check-box {
+    width: 22px; height: 22px;
+    border: 2px solid #4a5568;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.25s;
+    background: rgba(0, 0, 0, 0.3);
+    font-size: 14px;
+    color: transparent;
+  }
+  .check-row.ativo .check-box { background: var(--tema); border-color: var(--tema); color: #0a0f0a; font-weight: 900; }
+  .check-label { color: #d8ffe0; font-size: 0.88rem; font-weight: 600; flex: 1; }
+  .check-hint { color: #7fa887; font-size: 0.72rem; margin-top: 3px; font-style: italic; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 20px;
+    background: rgba(var(--tema-rgb), 0.1);
+    border: 1px solid var(--tema);
+    color: var(--tema);
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.25s;
+    margin-top: 12px;
+  }
+  .btn:hover { background: var(--tema); color: #0a0f0a; }
+
+  .btn.remover {
+    background: rgba(255, 60, 60, 0.1);
+    border-color: #ff3c3c;
+    color: #ff6666;
+    padding: 8px 14px;
+    font-size: 0.78rem;
+  }
+  .btn.remover:hover { background: #ff3c3c; color: #fff; }
+
+  .item-bloco {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(var(--tema-rgb), 0.15);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .item-bloco .item-numero {
+    position: absolute;
+    top: -10px;
+    left: 14px;
+    background: linear-gradient(135deg, var(--tema), var(--tema-escuro));
+    color: #0a0f0a;
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 10px;
+  }
+  .item-bloco .btn.remover { position: absolute; top: 10px; right: 10px; }
+
+  .ad-card {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(var(--tema-rgb), 0.15);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .ad-card.aberto {
+    border-color: rgba(var(--tema-rgb), 0.5);
+    background: rgba(var(--tema-rgb), 0.03);
+  }
+  .ad-header { display: flex; align-items: center; justify-content: space-between; gap: 15px; }
+  .ad-info { flex: 1; }
+  .ad-info strong { color: #d8ffe0; font-size: 0.95rem; display: block; }
+  .ad-info .ad-sub { color: #7fa887; font-size: 0.75rem; margin-top: 3px; }
+  .ad-body { display: none; margin-top: 16px; padding-top: 14px; border-top: 1px dashed rgba(var(--tema-rgb), 0.25); }
+  .ad-body.aberto { display: block; animation: fadeIn 0.3s ease; }
+  .toggle {
+    position: relative;
+    width: 50px; height: 26px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.25s;
+    flex-shrink: 0;
+  }
+  .toggle::after {
+    content: "";
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 20px; height: 20px;
+    background: #888;
+    border-radius: 50%;
+    transition: all 0.25s;
+  }
+  .toggle.on { background: rgba(var(--tema-rgb), 0.3); }
+  .toggle.on::after { background: var(--tema); left: 27px; box-shadow: 0 0 12px rgba(var(--tema-rgb), 0.7); }
+  .campo-hint { color: #7fa887; font-size: 0.72rem; margin-top: 4px; font-style: italic; }
+  .linha-tamanho { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+  .linha-tamanho input { width: 80px; text-align: center; font-weight: 700; }
+  .linha-tamanho .x { color: var(--tema); font-weight: 800; font-size: 1.1rem; }
+  .aviso-preview {
+    background: rgba(255, 200, 0, 0.08);
+    border: 1px solid rgba(255, 200, 0, 0.3);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: #ffcc00;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .campos-outros {
+    display: none;
+    margin-top: 12px;
+    padding: 12px;
+    background: rgba(var(--tema-rgb), 0.05);
+    border: 1px dashed rgba(var(--tema-rgb), 0.3);
+    border-radius: 10px;
+  }
+  .campos-outros.aberto { display: block; }
+
+  #codigoSaida {
+    width: 100%;
+    min-height: 55vh;
+    padding: 18px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid var(--tema);
+    border-radius: 14px;
+    color: var(--tema);
+    font-family: monospace;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    resize: vertical;
+  }
+
+  .acoes-codigo {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .btn-acao-grande {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px 10px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    line-height: 1.3;
+    text-align: center;
+    min-height: 70px;
+  }
+  .btn-acao-grande.voltar { background: #4a5568; color: #fff; }
+  .btn-acao-grande.voltar:hover { background: #5a6578; transform: translateY(-2px); }
+  .btn-acao-grande.visualizar {
+    background: linear-gradient(135deg, var(--tema), var(--tema-escuro));
+    color: #0a0f0a;
+    box-shadow: 0 0 20px rgba(var(--tema-rgb), 0.5);
+  }
+  .btn-acao-grande.visualizar:hover { box-shadow: 0 0 30px rgba(var(--tema-rgb), 0.8); transform: translateY(-2px); }
+  .btn-acao-grande.copiar {
+    background: linear-gradient(135deg, #2979ff, #1565c0);
+    color: #fff;
+    box-shadow: 0 0 20px rgba(41, 121, 255, 0.4);
+  }
+  .btn-acao-grande.copiar:hover { box-shadow: 0 0 30px rgba(41, 121, 255, 0.8); transform: translateY(-2px); }
+
+  .padrao-lista { display:flex; flex-direction:column; gap:10px; margin-top:10px; }
+  .padrao-item { background:rgba(0,255,128,0.04); border:1px solid rgba(0,255,128,0.15); border-radius:12px; padding:12px; position:relative; }
+  .padrao-item .padrao-numero { color:#00ff80; font-size:.78rem; font-weight:800; margin-bottom:7px; display:block; }
+  .padrao-item input, .padrao-item textarea { margin-bottom:7px; }
+  .padrao-item textarea { min-height:78px; }
+  .padrao-item .btn-remover-padrao { position:absolute; top:8px; right:8px; padding:6px 9px; font-size:.75rem; }
+  .padrao-acoes { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  .padrao-acoes .btn { flex:1; min-width:150px; }
+  .padrao-aviso { color:#7fa887; font-size:.8rem; line-height:1.45; background:rgba(0,255,128,.04); border-left:3px solid #00ff80; padding:10px; border-radius:7px; margin-top:8px; }
+
+  @media (max-width: 640px) {
+    .hub-titulo h1 { font-size: 1.3rem; }
+    .hub-topo { flex-direction: column; align-items: stretch; }
+    .btn-criar { justify-content: center; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .pagina-acoes { flex-direction: column; }
+    .btn-acao { justify-content: center; width: 100%; }
+    .btn-excluir { width: auto; align-self: flex-start; }
+    .acoes-codigo { grid-template-columns: 1fr; }
+    .linha-tamanho input { width: 70px; }
+    .btn-engrenagem { top: 12px; right: 12px; width: 48px; height: 48px; font-size: 1.3rem; }
+  }
+</style>
+</head>
+<body>
+
+<button class="btn-engrenagem" onclick="abrirPainel()" title="Personalizar">⚙️</button>
+
+<div class="painel-overlay" id="painelOverlay" onclick="fecharPainel()"></div>
+<div class="painel" id="painel">
+  <div class="painel-header">
+    <h2>⚙️ Personalizar</h2>
+    <button class="btn-fechar" onclick="fecharPainel()">✕</button>
+  </div>
+
+  <div class="painel-body">
+
+    <div class="painel-secao">
+      <h3>🎨 Cor do Tema</h3>
+      <label>Escolha a cor</label>
+      <input type="color" id="corTema" value="#00ff80" oninput="mudarCorTema(this.value)">
+
+      <label>Tom (escuro ↔ claro) <span class="valor-slider" id="valorTom">0</span></label>
+      <input type="range" id="sliderTom" min="-30" max="30" value="0" step="1" oninput="mudarTom(this.value)">
+
+      <label>Fundo da página</label>
+      <input type="color" id="corFundo" value="#0a0f0a" oninput="mudarFundo(this.value)">
+    </div>
+
+    <div class="painel-secao">
+      <h3>🎨 Cores Rápidas</h3>
+      <div class="btn-preview-tema">
+        <button onclick="presetCor('#00ff80')" style="color:#00ff80;">🟢 Verde</button>
+        <button onclick="presetCor('#a855f7')" style="color:#a855f7;">🟣 Roxo</button>
+        <button onclick="presetCor('#3b82f6')" style="color:#3b82f6;">🔵 Azul</button>
+        <button onclick="presetCor('#ec4899')" style="color:#ec4899;">🩷 Rosa</button>
+        <button onclick="presetCor('#f97316')" style="color:#f97316;">🟠 Laranja</button>
+        <button onclick="presetCor('#ef4444')" style="color:#ef4444;">🔴 Vermelho</button>
+        <button onclick="presetCor('#06b6d4')" style="color:#06b6d4;">🩵 Ciano</button>
+        <button onclick="presetCor('#eab308')" style="color:#eab308;">🟡 Amarelo</button>
+      </div>
+    </div>
+
+    <div class="painel-secao">
+      <h3>✍️ Fonte do Título</h3>
+
+      <label>Estilo</label>
+      <select id="fonteEstilo" onchange="mudarFonteEstilo(this.value)">
+        <option value="normal">Normal</option>
+        <option value="bold" selected>Negrito</option>
+        <option value="italic">Itálico</option>
+        <option value="bold italic">Negrito + Itálico</option>
+      </select>
+
+      <label>Forma da Letra</label>
+      <select id="fonteForma" onchange="mudarFonteForma(this.value)">
+        <optgroup label="— Padrão/Sistema —">
+          <option value="padrao" selected>Segoe UI (padrão)</option>
+          <option value="arial">Arial</option>
+          <option value="verdana">Verdana</option>
+          <option value="tahoma">Tahoma</option>
+          <option value="helvetica">Helvetica</option>
+        </optgroup>
+        <optgroup label="— Modernas/Amigáveis —">
+          <option value="trebuchet">Trebuchet MS</option>
+          <option value="franklin">Franklin Gothic</option>
+          <option value="segoe">Segoe UI Light</option>
+          <option value="calibri">Calibri</option>
+        </optgroup>
+        <optgroup label="— Arredondadas —">
+          <option value="comic">Comic Sans</option>
+          <option value="century">Century Gothic</option>
+          <option value="nunito">Nunito (arredondada)</option>
+        </optgroup>
+        <optgroup label="— Ousadas/Impactantes —">
+          <option value="impact">Impact</option>
+          <option value="arialblack">Arial Black</option>
+          <option value="haettenschweiler">Haettenschweiler</option>
+          <option value="rockwell">Rockwell</option>
+        </optgroup>
+        <optgroup label="— Clássicas/Serifadas —">
+          <option value="georgia">Georgia</option>
+          <option value="times">Times New Roman</option>
+          <option value="garamond">Garamond</option>
+          <option value="palatino">Palatino</option>
+          <option value="bookman">Bookman</option>
+        </optgroup>
+        <optgroup label="— Manuscritas/Grafite —">
+          <option value="brush">Brush Script</option>
+          <option value="segoescript">Segoe Script</option>
+          <option value="lucida_hand">Lucida Handwriting</option>
+          <option value="mistral">Mistral</option>
+        </optgroup>
+        <optgroup label="— Decorativas —">
+          <option value="papyrus">Papyrus</option>
+          <option value="copperplate">Copperplate</option>
+          <option value="oldenglish">Old English</option>
+          <option value="stencil">Stencil</option>
+        </optgroup>
+        <optgroup label="— Mono (máquina) —">
+          <option value="courier">Courier New</option>
+          <option value="lucida_console">Lucida Console</option>
+          <option value="consolas">Consolas</option>
+        </optgroup>
+      </select>
+      <div class="campo-hint">⚠️ Fontes decorativas/manuscritas podem ser substituídas em alguns dispositivos.</div>
+
+      <label>Estilo Especial (aplicado no título + destaques)</label>
+      <select id="fonteEfeito" onchange="mudarFonteEfeito(this.value)">
+        <option value="normal">Preenchido (normal)</option>
+        <option value="contorno">Contorno (só a borda da letra)</option>
+        <option value="sombra">Sombra Neon (brilho ao redor)</option>
+        <option value="3d">3D (profundidade)</option>
+      </select>
+
+      <label>Tamanho <span class="valor-slider" id="valorFonte">1.7rem</span></label>
+      <input type="range" id="sliderFonte" min="1.2" max="2.8" value="1.7" step="0.1" oninput="mudarFonteTamanho(this.value)">
+    </div>
+
+    <div class="painel-secao">
+      <h3>📌 Padrões da Nova Página</h3>
+      <div class="padrao-aviso">
+        💡 Configure aqui o que deve aparecer automaticamente quando você clicar em <b>CRIAR NOVA PÁGINA</b>.
+        Depois você ainda pode alterar cada página individualmente. Estas configurações ficam salvas no navegador.
+      </div>
+
+      <label>📺 Nome do Canal Padrão</label>
+      <input type="text" id="padraoNomeCanal" placeholder="Ex: Panda Ansioso">
+      <label>💬 Subtítulo Padrão</label>
+      <input type="text" id="padraoSubtitulo" placeholder="Ex: Downloads exclusivos 🐼💚">
+      <div class="campo-hint">💡 Nome do canal e subtítulo ficam definidos aqui e são usados automaticamente em todas as páginas novas.</div>
+
+      <label>🐼 Logo Padrão da Página</label>
+      <input type="text" id="padraoLogoUrl" placeholder="https://exemplo.com/logo.png">
+      <div class="campo-hint">💡 O logo é definido somente aqui e será usado como padrão nas páginas.</div>
+
+      <label>🎬 Vídeo Principal — um por linha</label>
+      <textarea id="padraoVideoPrincipal" placeholder="ID ou link do YouTube, um por linha"></textarea>
+
+      <label>🎬 Vídeos Sugeridos — um por linha</label>
+      <textarea id="padraoVideos" placeholder="ID ou link do YouTube, um por linha"></textarea>
+
+      <label>🔗 Links dos Botões de Download — um por linha</label>
+      <textarea id="padraoShopee" placeholder="Um link por linha"></textarea>
+      <div class="check-row" id="chk-linksDownloadPadrao" onclick="toggleLinksDownloadPadrao()">
+        <div class="check-box">✓</div>
+        <div>
+          <div class="check-label">Ativar links de intermediação</div>
+          <div class="check-hint">Se ativado: o primeiro clique passa pela etapa de link antes da contagem. Se desativado: vai direto para a contagem e depois para o download.</div>
+        </div>
+      </div>
+
+      <label>📱 Redes Sociais Padrão</label>
+      <div class="padrao-aviso" style="margin-bottom:10px;">💡 Cadastre aqui as redes que você quer usar como padrão. Elas ficam salvas na engrenagem e <b>não aparecem preenchidas</b> no editor de uma nova página.</div>
+      <div id="listaPadraoSociais"></div>
+      <button class="btn" onclick="adicionarPadraoSocial()">+ Adicionar Rede Social Padrão</button>
+
+      <div class="painel-secao" style="margin-top:16px;">
+        <h3>💰 Padrões de Anúncios (Adsterra)</h3>
+        <div class="padrao-aviso">💡 Toda a configuração técnica dos anúncios fica aqui: chave, código/domínio, tamanho e URL do script. <b>Aqui você não escolhe se o anúncio aparece.</b> Essa escolha fica somente dentro de cada página.</div>
+        <div id="listaAnunciosPadrao"></div>
+        <div class="padrao-acoes">
+          <button class="btn" onclick="salvarPadroesAnuncios()">💾 Salvar Anúncios Padrão</button>
+          <button class="btn-restaurar" onclick="restaurarPadroesAnuncios()">🔄 Restaurar Anúncios</button>
+        </div>
+      </div>
+
+      <div class="padrao-acoes">
+        <button class="btn" onclick="salvarPadroesConteudo()">💾 Salvar Padrões</button>
+        <button class="btn-restaurar" onclick="restaurarPadroesConteudo()">🔄 Restaurar Padrões</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="painel-footer">
+    <button class="btn-restaurar" onclick="restaurarPadrao()">🔄 Restaurar</button>
+    <button class="btn-aplicar" onclick="fecharPainel()">✓ Fechar</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="tela active" id="tela-hub">
+    <div class="hub-box">
+      <div class="hub-titulo">
+        <h1 id="tituloHub">PANDA CREATOR HUB</h1>
+        <span class="panda">🐼</span>
+      </div>
+
+      <div class="hub-topo">
+        <span class="label">Suas Configurações Salvas:</span>
+        <button class="btn-criar" onclick="criarNovaPagina()">
+          <span class="mais">+</span> CRIAR NOVA PÁGINA
+        </button>
+      </div>
+
+      <div class="lista-paginas" id="listaPaginas"></div>
+    </div>
+  </div>
+
+  <div class="tela" id="tela-editor">
+    <div class="topbar">
+      <button class="btn-voltar" onclick="voltarHub()">← Voltar</button>
+      <div class="topbar-titulo" id="editorTitulo">Editando: Nova Página</div>
+      <button class="btn-salvar" onclick="salvarPagina()">💾 Salvar</button>
+    </div>
+
+    <div class="secao">
+      <h2>📝 Nome da Página (só pra você organizar)</h2>
+      <input type="text" id="cfg-nomePagina" placeholder="Ex: Panda Edit Pack — Dezembro" value="Página Sem Nome">
+    </div>
+
+    <div class="secao">
+      <h2>🎬 Vídeo Principal (o que fica no player grande)</h2>
+      <p style="color:#7fa887;font-size:0.82rem;margin-bottom:12px;">
+        💡 <b>1 vídeo</b> = fixo. <b>2 ou mais</b> = sorteia a cada carregamento.
+        Aceita <b>ID</b> ou <b>link completo</b>. O campo mostra apenas o que você adicionar nesta página.
+      </p>
+      <textarea id="cfg-videoPrincipal" placeholder="Ex:
+giJXYqCZShU
+https://youtu.be/ZsF7gaMhMvw"></textarea>
+
+      <div class="check-row" id="chk-videoPrincipalIncluirPadroes" onclick="toggleChk('videoPrincipal')">
+        <div class="check-box">✓</div>
+        <div>
+          <div class="check-label">Incluir o padrão do canal</div>
+          <div class="check-hint">Se marcado: padrão + o seu. Se desmarcado: apenas o seu.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="secao">
+      <h2>🎬 Vídeos Sugeridos (miniaturas abaixo do player)</h2>
+      <label>IDs ou links (um por linha — aqui entram apenas os adicionais desta página)</label>
+      <textarea id="cfg-videoSugeridos" placeholder="Ex:
+giJXYqCZShU
+https://youtu.be/ZsF7gaMhMvw"></textarea>
+
+      <div class="check-row" id="chk-videosIncluirPadroes" onclick="toggleChk('videos')">
+        <div class="check-box">✓</div>
+        <div>
+          <div class="check-label">Incluir os padrões do canal</div>
+          <div class="check-hint">Se marcado: padrões + os seus. Se desmarcado: apenas os seus.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="secao">
+      <h2>🔗 Links dos Botões de Download</h2>
+      <p style="color:#7fa887;font-size:0.82rem;margin-bottom:12px;">
+        💡 Cole qualquer URL, um por linha. Os padrões ficam salvos na engrenagem e são usados somente se a opção abaixo estiver ativada.
+      </p>
+      <label>Links adicionais dos botões de download (um por linha)</label>
+      <textarea id="cfg-shopee" placeholder="Ex:
+https://exemplo.com/link1
+https://exemplo.com/link2"></textarea>
+
+      <div class="check-row" id="chk-shopeeIncluirPadroes" onclick="toggleChk('shopee')">
+        <div class="check-box">✓</div>
+        <div>
+          <div class="check-label">Incluir os padrões do canal</div>
+          <div class="check-hint">Se marcado: padrões + os seus. Se desmarcado: apenas os seus.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="secao">
+      <h2>⬇️ Downloads</h2>
+      <div id="listaDownloads"></div>
+      <button class="btn" onclick="adicionarDownload()">+ Adicionar Download</button>
+    </div>
+
+    <div class="secao">
+      <h2>📱 Redes Sociais</h2>
+      <p style="color:#7fa887;font-size:0.82rem;margin-bottom:12px;">
+        💡 Escolha a rede no select. Se ela não estiver na lista, escolha <b>"Outros"</b> e coloque o logo + cor personalizados.
+      </p>
+      <div id="listaSociais"></div>
+      <button class="btn" onclick="adicionarSocial()">+ Adicionar Rede Social</button>
+      <div class="check-row" id="chk-sociaisIncluirPadroes" onclick="toggleChk('sociais')">
+        <div class="check-box">✓</div>
+        <div>
+          <div class="check-label">Incluir as redes sociais padrão</div>
+          <div class="check-hint">Se marcado: padrões + as redes desta página. Se desmarcado: apenas as redes desta página.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="secao">
+      <h2>💰 Anúncios</h2>
+      <div class="aviso-preview">
+        💡 Aqui você escolhe apenas <b>se quer ou não quer</b> cada anúncio nesta página.
+        <br>As chaves, links, códigos, tamanhos e demais configurações ficam na <b>engrenagem → Padrões de Anúncios</b>.
+        <br><br>
+        ⚠️ <b>Importante:</b> Popunder e Social Bar <b>NÃO aparecem no preview do gerador</b> (o navegador bloqueia). Mas funcionam <b>na página hospedada</b>.
+      </div>
+      <div id="listaAnuncios"></div>
+    </div>
+
+    <div style="text-align:center;margin:24px 0;">
+      <button class="btn-salvar" onclick="salvarPagina()" style="font-size:1rem;padding:14px 32px;">
+        💾 Salvar Página
+      </button>
+    </div>
+  </div>
+
+  <div class="tela" id="tela-codigo">
+    <div class="topbar">
+      <div class="topbar-titulo" id="codigoTitulo">⚡ Código HTML Pronto!</div>
+    </div>
+
+    <div class="secao">
+      <h2>📄 Copie o código abaixo e publique no seu GitHub Pages</h2>
+      <textarea id="codigoSaida" readonly></textarea>
+
+      <div class="acoes-codigo">
+        <button class="btn-acao-grande voltar" onclick="voltarHub()">VOLTAR<br>PARA A<br>LISTA</button>
+        <button class="btn-acao-grande visualizar" onclick="visualizarPagina()">👁️<br>VISUALIZAR<br>PÁGINA</button>
+        <button class="btn-acao-grande copiar" onclick="copiarCodigo()">📋<br>COPIAR<br>CÓDIGO</button>
+      </div>
+
+      <div style="text-align:center;margin-top:12px;">
+        <button class="btn" onclick="baixarHTML()">💾 Baixar como .html</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ======================================================
+   FONTES DISPONÍVEIS
+   ====================================================== */
+const FONTES = {
+  padrao: "'Segoe UI', system-ui, sans-serif",
+  arial: "Arial, sans-serif",
+  verdana: "Verdana, sans-serif",
+  tahoma: "Tahoma, sans-serif",
+  helvetica: "Helvetica, Arial, sans-serif",
+  trebuchet: "'Trebuchet MS', sans-serif",
+  franklin: "'Franklin Gothic Medium', sans-serif",
+  segoe: "'Segoe UI Light', 'Segoe UI', sans-serif",
+  calibri: "Calibri, sans-serif",
+  comic: "'Comic Sans MS', 'Chalkboard SE', cursive",
+  century: "'Century Gothic', 'Apple Gothic', sans-serif",
+  nunito: "'Nunito', 'Quicksand', 'Segoe UI', sans-serif",
+  impact: "Impact, 'Arial Black', sans-serif",
+  arialblack: "'Arial Black', Arial, sans-serif",
+  haettenschweiler: "Haettenschweiler, 'Arial Narrow Bold', sans-serif",
+  rockwell: "Rockwell, 'Courier New', serif",
+  georgia: "Georgia, serif",
+  times: "'Times New Roman', Times, serif",
+  garamond: "Garamond, serif",
+  palatino: "'Palatino Linotype', 'Book Antiqua', Palatino, serif",
+  bookman: "'Bookman Old Style', serif",
+  brush: "'Brush Script MT', cursive",
+  segoescript: "'Segoe Script', 'Comic Sans MS', cursive",
+  lucida_hand: "'Lucida Handwriting', cursive",
+  mistral: "Mistral, 'Brush Script MT', cursive",
+  papyrus: "Papyrus, fantasy",
+  copperplate: "'Copperplate Gothic', fantasy",
+  oldenglish: "'Old English Text MT', 'UnifrakturCook', fantasy",
+  stencil: "Stencil, 'Arial Black', sans-serif",
+  courier: "'Courier New', monospace",
+  lucida_console: "'Lucida Console', Monaco, monospace",
+  consolas: "Consolas, Monaco, monospace"
+};
+
+/* ======================================================
+   TEMA
+   ====================================================== */
+const TEMA_KEY = "pandaTema";
+let tema = {
+  cor: "#00ff80",
+  tom: 0,
+  fundo: "#0a0f0a",
+  fonteEstilo: "bold",
+  fonteForma: "padrao",
+  fonteEfeito: "normal",
+  fonteTamanho: 1.7
+};
+
+function hexParaHSL(hex) {
+  hex = hex.replace("#", "");
+  const r = parseInt(hex.substr(0, 2), 16) / 255;
+  const g = parseInt(hex.substr(2, 2), 16) / 255;
+  const b = parseInt(hex.substr(4, 2), 16) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h, s, l = (max + min) / 2;
+  if (max === min) { h = s = 0; }
+  else {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h /= 6;
+  }
+  return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+}
+
+function hexParaRgb(hex) {
+  hex = hex.replace("#", "");
+  return `${parseInt(hex.substr(0, 2), 16)}, ${parseInt(hex.substr(2, 2), 16)}, ${parseInt(hex.substr(4, 2), 16)}`;
+}
+
+function aplicarTema() {
+  const root = document.documentElement;
+  const hsl = hexParaHSL(tema.cor);
+  root.style.setProperty("--tema", tema.cor);
+  root.style.setProperty("--tema-h", hsl.h);
+  root.style.setProperty("--tema-s", hsl.s + "%");
+  root.style.setProperty("--tema-l", (hsl.l + tema.tom) + "%");
+  root.style.setProperty("--tema-escuro", `hsl(${hsl.h}, ${hsl.s}%, ${Math.max(10, hsl.l + tema.tom - 20)}%)`);
+  root.style.setProperty("--tema-claro", `hsl(${hsl.h}, ${hsl.s}%, ${Math.min(90, hsl.l + tema.tom + 20)}%)`);
+  root.style.setProperty("--tema-rgb", hexParaRgb(tema.cor));
+  root.style.setProperty("--fundo", tema.fundo);
+
+  root.style.setProperty("--titulo-fonte", FONTES[tema.fonteForma] || FONTES.padrao);
+  root.style.setProperty("--titulo-peso", tema.fonteEstilo.includes("bold") ? "800" : "500");
+  root.style.setProperty("--titulo-estilo", tema.fonteEstilo.includes("italic") ? "italic" : "normal");
+  root.style.setProperty("--titulo-tamanho", tema.fonteTamanho + "rem");
+
+  // Aplica efeito no título do hub
+  const titulo = document.getElementById("tituloHub");
+  if (titulo) {
+    titulo.classList.remove("contorno", "sombra", "tresd");
+    if (tema.fonteEfeito === "contorno") titulo.classList.add("contorno");
+    if (tema.fonteEfeito === "sombra") titulo.classList.add("sombra");
+    if (tema.fonteEfeito === "3d") titulo.classList.add("tresd");
+  }
+
+  document.getElementById("corTema").value = tema.cor;
+  document.getElementById("sliderTom").value = tema.tom;
+  document.getElementById("valorTom").textContent = tema.tom > 0 ? "+" + tema.tom : tema.tom;
+  document.getElementById("corFundo").value = tema.fundo;
+  document.getElementById("fonteEstilo").value = tema.fonteEstilo;
+  document.getElementById("fonteForma").value = tema.fonteForma;
+  document.getElementById("fonteEfeito").value = tema.fonteEfeito;
+  document.getElementById("sliderFonte").value = tema.fonteTamanho;
+  document.getElementById("valorFonte").textContent = tema.fonteTamanho + "rem";
+}
+
+function salvarTema() { localStorage.setItem(TEMA_KEY, JSON.stringify(tema)); }
+
+function carregarTema() {
+  const salvo = localStorage.getItem(TEMA_KEY);
+  if (salvo) { try { tema = { ...tema, ...JSON.parse(salvo) }; } catch(e) {} }
+  aplicarTema();
+}
+
+function mudarCorTema(cor) { tema.cor = cor; aplicarTema(); salvarTema(); }
+function mudarTom(valor) { tema.tom = parseInt(valor); aplicarTema(); salvarTema(); }
+function mudarFundo(cor) { tema.fundo = cor; aplicarTema(); salvarTema(); }
+function mudarFonteEstilo(v) { tema.fonteEstilo = v; aplicarTema(); salvarTema(); }
+function mudarFonteForma(v) { tema.fonteForma = v; aplicarTema(); salvarTema(); }
+function mudarFonteEfeito(v) { tema.fonteEfeito = v; aplicarTema(); salvarTema(); }
+function mudarFonteTamanho(v) { tema.fonteTamanho = parseFloat(v); aplicarTema(); salvarTema(); }
+function presetCor(cor) { tema.cor = cor; aplicarTema(); salvarTema(); }
+
+function restaurarPadrao() {
+  if (!confirm("⚠️ Restaurar tema padrão (verde)?")) return;
+  tema = { cor: "#00ff80", tom: 0, fundo: "#0a0f0a", fonteEstilo: "bold", fonteForma: "padrao", fonteEfeito: "normal", fonteTamanho: 1.7 };
+  aplicarTema(); salvarTema();
+}
+
+function abrirPainel() {
+  renderPadroesConteudo();
+  document.getElementById("painel").classList.add("aberto");
+  document.getElementById("painelOverlay").classList.add("aberto");
+}
+
+function fecharPainel() {
+  document.getElementById("painel").classList.remove("aberto");
+  document.getElementById("painelOverlay").classList.remove("aberto");
+}
+
+/* ======================================================
+   REDES SOCIAIS
+   ====================================================== */
+const REDES = {
+  tiktok: { nome: "TikTok", cor: "#ff0033", corFundo: "#000",
+    svg: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>` },
+  telegramGrupo: { nome: "Telegram (Grupo)", cor: "#29a1e0", corFundo: "rgba(41, 161, 224, 0.05)",
+    svg: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>` },
+  telegramPerfil: { nome: "Telegram (Perfil)", cor: "#29a1e0", corFundo: "#29a1e0",
+    svg: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>` },
+  whatsapp: { nome: "WhatsApp", cor: "#25d366", corFundo: "rgba(37, 211, 102, 0.05)",
+    svg: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>` },
+  facebook: { nome: "Facebook", cor: "#1877f2", corFundo: "rgba(24, 119, 242, 0.05)",
+    svg: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>` },
+  instagram: { nome: "Instagram", cor: "#e4405f", corFundo: "rgba(228, 64, 95, 0.05)",
+    svg: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>` },
+  youtube: { nome: "YouTube", cor: "#ff0000", corFundo: "rgba(255, 0, 0, 0.05)",
+    svg: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>` },
+  x: { nome: "X (Twitter)", cor: "#ffffff", corFundo: "#000000",
+    svg: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>` },
+  discord: { nome: "Discord", cor: "#5865f2", corFundo: "rgba(88, 101, 242, 0.05)",
+    svg: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>` },
+  kwai: { nome: "Kwai", cor: "#ff7300", corFundo: "rgba(255, 115, 0, 0.05)",
+    svg: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm4.955 6.662c-.195.34-.51.59-.88.7l-2.62.79v5.028c0 2.275-1.85 4.125-4.125 4.125S5.205 15.455 5.205 13.18s1.85-4.125 4.125-4.125c.183 0 .363.014.539.04v2.14a2.05 2.05 0 00-.539-.075 2.02 2.02 0 000 4.04 2.02 2.02 0 002.02-2.02V2.325h2.1v5.415l1.815-.548a2.05 2.05 0 001.4-1.925V2.325h2.09v2.587c0 .617-.108 1.228-.32 1.79-.147.383-.317.754-.51 1.11z"/></svg>` }
+};
+
+const VIDEOS_PADRAO_FABRICA = ["ZsF7gaMhMvw","jdjfZh-ZXq8","JlKrPbHpijU","GlNHDZpT5UU","d9p7SAnpakU","ujSKDCLya3g","KGxZK9I79RQ","roGe1wotoYM","TjYQ1iUuMlA","P_S9rRbdHhE","2588HbuLrtA"];
+const VIDEO_PRINCIPAL_PADRAO_FABRICA = ["giJXYqCZShU"];
+const SHOPEE_PADRAO_FABRICA = ["https://s.shopee.com.br/1gGAQYhaiv","https://s.shopee.com.br/2qS7oj7XmR","https://s.shopee.com.br/6VLQBUFJj5","https://s.shopee.com.br/3LOOPgZUce","https://s.shopee.com.br/40e5CvfcpC","https://s.shopee.com.br/60P9acpCqm","https://s.shopee.com.br/3LOOPkKx93","https://s.shopee.com.br/902lACp5sm"];
+const DOWNLOADS_PADRAO_FABRICA = [{ id: "un1ca", nome: "un1ca", linkFinal: "https://drive.google.com/" }];
+
+let VIDEOS_PADRAO = [...VIDEOS_PADRAO_FABRICA];
+let VIDEO_PRINCIPAL_PADRAO = [...VIDEO_PRINCIPAL_PADRAO_FABRICA];
+let SHOPEE_PADRAO = [...SHOPEE_PADRAO_FABRICA];
+let DOWNLOADS_PADRAO = JSON.parse(JSON.stringify(DOWNLOADS_PADRAO_FABRICA));
+let LOGO_PADRAO = "";
+let NOME_CANAL_PADRAO = "Panda Ansioso";
+let SUBTITULO_PADRAO = "Downloads exclusivos 🐼💚";
+let LINKS_DOWNLOAD_ATIVOS = true;
+const PADROES_IDENTIDADE_KEY = "pandaPadroesIdentidade";
+const SOCIAIS_PADRAO_FABRICA = [
+  { tipo: "tiktok", nome: "TIKTOK", url: "https://www.tiktok.com/@pandaansioso" },
+  { tipo: "telegramGrupo", nome: "GRUPO", url: "https://t.me/r8q_BR" },
+  { tipo: "telegramGrupo", nome: "GRUPO DO CANAL", url: "https://t.me/+bSBwWICUIYs1ODU5" },
+  { tipo: "telegramPerfil", nome: "PERFIL", url: "https://t.me/PANDA_ANSIOSO" }
+];
+let SOCIAIS_PADRAO = JSON.parse(JSON.stringify(SOCIAIS_PADRAO_FABRICA));
+const PADROES_CONTEUDO_KEY = "pandaPadroesConteudo";
+const PADROES_SOCIAIS_KEY = "pandaPadroesSociais";
+
+const ADS_INFO = [
+  { id: "topo", icone: "🔝", nome: "Anúncio Topo (728x90)", descricao: "Aparece no topo das 2 páginas", tipo: "banner",
+    padrao: { key: "0090fc855bce8fb389926eabcc55ed1f", width: 728, height: 90 },
+    placeholderKey: "Ex: 0090fc855bce8fb389926eabcc55ed1f" },
+  { id: "nativoP1", icone: "📦", nome: "Anúncio Nativo (Pág 1)", descricao: "Entre vídeos e downloads", tipo: "nativo",
+    padrao: { key: "94f71d23e1cb7f5455caa2e345da6d0b", src: "pl29740469.profitableratecpmnetwork.com" },
+    placeholderKey: "Ex: 94f71d23e1cb7f5455caa2e345da6d0b",
+    placeholderSrc: "Ex: pl29740469.profitableratecpmnetwork.com" },
+  { id: "bannerP2", icone: "📐", nome: "Banner Pág 2 (320x50)", descricao: "Entre vídeos e downloads na pág 2", tipo: "banner",
+    padrao: { key: "41eb470e322f84ddcbac2a56ee7c4ef5", width: 320, height: 50 },
+    placeholderKey: "Ex: 41eb470e322f84ddcbac2a56ee7c4ef5" },
+  { id: "rodapeP1", icone: "🔻", nome: "Rodapé Pág 1 (300x250)", descricao: "Antes do copyright na pág 1", tipo: "banner",
+    padrao: { key: "649e8619ac522c5b495c01e468041d0e", width: 300, height: 250 },
+    placeholderKey: "Ex: 649e8619ac522c5b495c01e468041d0e" },
+  { id: "rodapeP2", icone: "🔻", nome: "Rodapé Pág 2 (468x60)", descricao: "Antes do copyright na pág 2", tipo: "banner",
+    padrao: { key: "c556bd1b7ca67e48e7f2d4d4e2684217", width: 468, height: 60 },
+    placeholderKey: "Ex: c556bd1b7ca67e48e7f2d4d4e2684217" },
+  { id: "popunder", icone: "🪟", nome: "Popunder (Global)", descricao: "Abre nova aba ao clicar — funciona nas 2 páginas", tipo: "link",
+    padrao: { src: "https://pl29725634.profitableratecpmnetwork.com/6f/9b/2c/6f9b2c7ad1c7f92594d3d5e23ae29dd6.js" },
+    placeholderSrc: "Ex: https://pl29725634.profitableratecpmnetwork.com/6f/9b/2c/...js" },
+  { id: "socialbar", icone: "📌", nome: "Social Bar (Global)", descricao: "Barra flutuante fixa — funciona nas 2 páginas", tipo: "link",
+    padrao: { src: "https://pl29725480.profitableratecpmnetwork.com/09/2f/ac/092facea61b744fe5140d48a0f6cb8e2.js" },
+    placeholderSrc: "Ex: https://pl29725480.profitableratecpmnetwork.com/09/2f/ac/...js" }
+];
+
+const PADROES_ANUNCIOS_KEY = "pandaPadroesAnuncios";
+let anunciosPadrao = {};
+
+let paginas = [];
+let paginaAtual = null;
+let modoEdicao = "nova";
+let downloads = [];
+let sociais = [];
+let anuncios = {};
+let chk = { videoPrincipal: true, videos: true, shopee: true, sociais: true };
+
+const STORAGE_KEY = "pandaHubPaginas";
+
+function extrairIdYoutube(linkOuId) {
+  if (!linkOuId) return "";
+  linkOuId = linkOuId.trim();
+  if (linkOuId.includes("youtu.be/")) return linkOuId.split("youtu.be/")[1].split("?")[0].split("&")[0];
+  if (linkOuId.includes("youtube.com/watch")) {
+    try { const url = new URL(linkOuId); return url.searchParams.get("v") || ""; } catch(e) { return linkOuId; }
+  }
+  if (linkOuId.includes("youtube.com/embed/")) return linkOuId.split("embed/")[1].split("?")[0];
+  if (linkOuId.includes("youtube.com/shorts/")) return linkOuId.split("shorts/")[1].split("?")[0];
+  return linkOuId;
+}
+
+function toggleChk(quem) {
+  chk[quem] = !chk[quem];
+  document.getElementById("chk-" + quem + "IncluirPadroes").classList.toggle("ativo", chk[quem]);
+}
+
+function resetarAnunciosPadrao() {
+  anunciosPadrao = {};
+  ADS_INFO.forEach(ad => {
+    anunciosPadrao[ad.id] = {
+      ativo: true,
+      key: "", src: "", width: "", height: ""
+    };
+  });
+}
+
+function carregarPadroesAnuncios() {
+  resetarAnunciosPadrao();
+  const salvo = localStorage.getItem(PADROES_ANUNCIOS_KEY);
+  if (!salvo) return;
+  try {
+    const p = JSON.parse(salvo);
+    ADS_INFO.forEach(ad => {
+      const s = p[ad.id];
+      if (!s) return;
+      anunciosPadrao[ad.id].ativo = s.ativo !== false;
+      anunciosPadrao[ad.id].key = s.key || "";
+      anunciosPadrao[ad.id].src = s.src || "";
+      anunciosPadrao[ad.id].width = s.width || "";
+      anunciosPadrao[ad.id].height = s.height || "";
+    });
+  } catch(e) {}
+}
+
+function salvarPadroesAnuncios() {
+  localStorage.setItem(PADROES_ANUNCIOS_KEY, JSON.stringify(anunciosPadrao));
+  alert("✅ Padrões de anúncios salvos!");
+}
+
+function restaurarPadroesAnuncios() {
+  if (!confirm("⚠️ Restaurar as configurações dos anúncios para os valores originais?")) return;
+  resetarAnunciosPadrao();
+  localStorage.setItem(PADROES_ANUNCIOS_KEY, JSON.stringify(anunciosPadrao));
+  renderAnunciosPadrao();
+}
+
+function resetarAnuncios() {
+  anuncios = {};
+  ADS_INFO.forEach(ad => {
+    const pad = anunciosPadrao[ad.id] || {};
+    anuncios[ad.id] = {
+      ativo: pad.ativo !== false,
+      key: pad.key || "",
+      src: pad.src || "",
+      width: pad.width || "",
+      height: pad.height || ""
+    };
+  });
+}
+
+function aplicarAnunciosSalvos(salvos) {
+  resetarAnuncios();
+  if (!salvos) return;
+  ADS_INFO.forEach(ad => {
+    const s = salvos[ad.id]; if (!s) return;
+    anuncios[ad.id].ativo = s.ativo !== false;
+  });
+}
+
+function renderAnuncioCards(containerId, modo) {
+  const c = document.getElementById(containerId);
+  if (!c) return;
+  c.innerHTML = "";
+  ADS_INFO.forEach(ad => {
+    const info = modo === "padrao" ? anunciosPadrao[ad.id] : anuncios[ad.id];
+    const ativo = info.ativo;
+    const card = document.createElement("div");
+    card.className = "ad-card" + (ativo ? " aberto" : "");
+    const header = document.createElement("div");
+    header.className = "ad-header";
+    header.innerHTML = `<div class="ad-info"><strong>${ad.icone} ${ad.nome}</strong><div class="ad-sub">${ad.descricao}</div></div>`;
+    if (modo === "pagina") {
+      const toggle = document.createElement("div");
+      toggle.className = "toggle" + (ativo ? " on" : "");
+      toggle.onclick = () => {
+        info.ativo = !info.ativo;
+        renderAnuncioCards(containerId, modo);
+      };
+      header.appendChild(toggle);
+    }
+    card.appendChild(header);
+
+    if (modo === "padrao") {
+      const body = document.createElement("div");
+      body.className = "ad-body aberto";
+      if (ad.tipo === "banner") {
+        body.innerHTML = `
+          <label>Chave (deixe vazio pra usar padrão de fábrica)</label>
+          <input type="text" class="ad-key-input" placeholder="${ad.placeholderKey}" value="${info.key}">
+          <label>Tamanho</label>
+          <div class="linha-tamanho">
+            <input type="number" class="ad-w-input" placeholder="W" value="${info.width}">
+            <span class="x">×</span>
+            <input type="number" class="ad-h-input" placeholder="H" value="${info.height}">
+          </div>
+          <div class="campo-hint">Padrão de fábrica: ${ad.padrao.width} × ${ad.padrao.height}</div>`;
+        body.querySelector(".ad-key-input").oninput = e => { info.key = e.target.value.trim(); };
+        body.querySelector(".ad-w-input").oninput = e => { info.width = e.target.value.trim(); };
+        body.querySelector(".ad-h-input").oninput = e => { info.height = e.target.value.trim(); };
+      }
+      if (ad.tipo === "nativo") {
+        body.innerHTML = `
+          <label>Chave (deixe vazio pra usar padrão de fábrica)</label>
+          <input type="text" class="ad-key-input" placeholder="${ad.placeholderKey}" value="${info.key}">
+          <label>Domínio do script (deixe vazio pra usar padrão de fábrica)</label>
+          <input type="text" class="ad-src-input" placeholder="${ad.placeholderSrc}" value="${info.src}">`;
+        body.querySelector(".ad-key-input").oninput = e => { info.key = e.target.value.trim(); };
+        body.querySelector(".ad-src-input").oninput = e => { info.src = e.target.value.trim(); };
+      }
+      if (ad.tipo === "link") {
+        body.innerHTML = `
+          <label>URL do script (deixe vazio pra usar padrão de fábrica)</label>
+          <input type="text" class="ad-src-input" placeholder="${ad.placeholderSrc}" value="${info.src}">`;
+        body.querySelector(".ad-src-input").oninput = e => { info.src = e.target.value.trim(); };
+      }
+      card.appendChild(body);
+    }
+    c.appendChild(card);
+  });
+}
+
+function renderAnunciosPadrao() { renderAnuncioCards("listaAnunciosPadrao", "padrao"); }
+function renderAnuncios() { renderAnuncioCards("listaAnuncios", "pagina"); }
+
+function extrairChave(input) {
+  if (!input) return "";
+  input = input.trim();
+  const m = input.match(/highrevenueformat\.com\/([a-z0-9]+)\//i);
+  if (m) return m[1];
+  return input;
+}
+
+function pegarConfig(adInfo) {
+  const info = anunciosPadrao[adInfo.id] || {};
+  const pad = adInfo.padrao;
+  if (adInfo.tipo === "banner") {
+    return { key: info.key ? extrairChave(info.key) : pad.key, width: info.width ? parseInt(info.width) : pad.width, height: info.height ? parseInt(info.height) : pad.height };
+  }
+  if (adInfo.tipo === "nativo") {
+    return { key: info.key ? extrairChave(info.key) : pad.key, src: info.src ? info.src : pad.src };
+  }
+  if (adInfo.tipo === "link") { return { src: info.src ? info.src : pad.src }; }
+}
+
+function carregarDoStorage() {
+  const salvo = localStorage.getItem(STORAGE_KEY);
+  if (salvo) { try { paginas = JSON.parse(salvo); } catch(e) { paginas = []; } }
+}
+function salvarNoStorage() { localStorage.setItem(STORAGE_KEY, JSON.stringify(paginas)); }
+
+function carregarPadroesConteudo() {
+  carregarPadroesAnuncios();
+  carregarPadroesSociais();
+  const salvo = localStorage.getItem(PADROES_CONTEUDO_KEY);
+  if (salvo) {
+    try {
+      const p = JSON.parse(salvo);
+      if (Array.isArray(p.videos)) VIDEOS_PADRAO = p.videos.filter(Boolean);
+      if (Array.isArray(p.videoPrincipal)) VIDEO_PRINCIPAL_PADRAO = p.videoPrincipal.filter(Boolean);
+      if (Array.isArray(p.shopee)) SHOPEE_PADRAO = p.shopee.filter(Boolean);
+      if (typeof p.linksDownloadAtivos === "boolean") LINKS_DOWNLOAD_ATIVOS = p.linksDownloadAtivos;
+    } catch(e) {}
+  }
+}
+
+function carregarPadroesIdentidade() {
+  const salvo = localStorage.getItem(PADROES_IDENTIDADE_KEY);
+  if (salvo) {
+    try {
+      const p = JSON.parse(salvo);
+      LOGO_PADRAO = p.logoUrl || "";
+      NOME_CANAL_PADRAO = p.nomeCanal || NOME_CANAL_PADRAO;
+      SUBTITULO_PADRAO = p.subtitulo || SUBTITULO_PADRAO;
+    } catch(e) {}
+  }
+}
+
+function salvarPadroesIdentidade() {
+  const logo = document.getElementById("padraoLogoUrl");
+  const nomeCanal = document.getElementById("padraoNomeCanal");
+  const subtitulo = document.getElementById("padraoSubtitulo");
+  if (logo) LOGO_PADRAO = logo.value.trim();
+  if (nomeCanal) NOME_CANAL_PADRAO = nomeCanal.value.trim() || "Panda Ansioso";
+  if (subtitulo) SUBTITULO_PADRAO = subtitulo.value.trim();
+  localStorage.setItem(PADROES_IDENTIDADE_KEY, JSON.stringify({ logoUrl: LOGO_PADRAO, nomeCanal: NOME_CANAL_PADRAO, subtitulo: SUBTITULO_PADRAO }));
+}
+
+function salvarPadroesConteudo() {
+  salvarPadroesIdentidade();
+  VIDEOS_PADRAO = document.getElementById("padraoVideos").value.split("\n").map(l => l.trim()).filter(Boolean).map(extrairIdYoutube);
+  VIDEO_PRINCIPAL_PADRAO = document.getElementById("padraoVideoPrincipal").value.split("\n").map(l => l.trim()).filter(Boolean).map(extrairIdYoutube);
+  SHOPEE_PADRAO = document.getElementById("padraoShopee").value.split("\n").map(l => l.trim()).filter(Boolean);
+
+  localStorage.setItem(PADROES_CONTEUDO_KEY, JSON.stringify({
+    videos: VIDEOS_PADRAO, videoPrincipal: VIDEO_PRINCIPAL_PADRAO, shopee: SHOPEE_PADRAO, linksDownloadAtivos: LINKS_DOWNLOAD_ATIVOS
+  }));
+  salvarPadroesSociais();
+  renderPadroesConteudo();
+  alert("✅ Padrões da nova página salvos!");
+}
+
+function renderPadroesConteudo() {
+  const logo = document.getElementById("padraoLogoUrl");
+  const nomeCanal = document.getElementById("padraoNomeCanal");
+  const subtitulo = document.getElementById("padraoSubtitulo");
+  const vp = document.getElementById("padraoVideoPrincipal");
+  const vs = document.getElementById("padraoVideos");
+  const sp = document.getElementById("padraoShopee");
+  if (!vp || !vs || !sp) return;
+  if (logo) logo.value = LOGO_PADRAO;
+  if (nomeCanal) nomeCanal.value = NOME_CANAL_PADRAO;
+  if (subtitulo) subtitulo.value = SUBTITULO_PADRAO;
+  vp.value = VIDEO_PRINCIPAL_PADRAO.join("\n");
+  vs.value = VIDEOS_PADRAO.join("\n");
+  sp.value = SHOPEE_PADRAO.join("\n");
+  const chkLinks = document.getElementById("chk-linksDownloadPadrao");
+  if (chkLinks) chkLinks.classList.toggle("ativo", LINKS_DOWNLOAD_ATIVOS);
+  renderPadraoSociais();
+  renderAnunciosPadrao();
+}
+
+function salvarPadroesConteudoSilencioso() {
+  const vp = document.getElementById("padraoVideoPrincipal");
+  const vs = document.getElementById("padraoVideos");
+  const sp = document.getElementById("padraoShopee");
+  if (!vp || !vs || !sp) return;
+  VIDEOS_PADRAO = vs.value.split("\n").map(l => l.trim()).filter(Boolean).map(extrairIdYoutube);
+  VIDEO_PRINCIPAL_PADRAO = vp.value.split("\n").map(l => l.trim()).filter(Boolean).map(extrairIdYoutube);
+  SHOPEE_PADRAO = sp.value.split("\n").map(l => l.trim()).filter(Boolean);
+}
+
+function carregarPadroesSociais() {
+  const salvo = localStorage.getItem(PADROES_SOCIAIS_KEY);
+  if (salvo) { try { const p = JSON.parse(salvo); if (Array.isArray(p)) SOCIAIS_PADRAO = p; } catch(e) {} }
+}
+
+function salvarPadroesSociais() {
+  localStorage.setItem(PADROES_SOCIAIS_KEY, JSON.stringify(SOCIAIS_PADRAO));
+}
+
+function opcoesTiposSociaisHTML(tipo) {
+  const opcoes = [
+    { value: "tiktok", label: "TikTok" }, { value: "telegramGrupo", label: "Telegram (Grupo)" },
+    { value: "telegramPerfil", label: "Telegram (Perfil)" }, { value: "whatsapp", label: "WhatsApp" },
+    { value: "facebook", label: "Facebook" }, { value: "instagram", label: "Instagram" },
+    { value: "youtube", label: "YouTube" }, { value: "x", label: "X (Twitter)" },
+    { value: "discord", label: "Discord" }, { value: "kwai", label: "Kwai" },
+    { value: "outros", label: "🔗 Outros (personalizado)" }
+  ];
+  return opcoes.map(op => `<option value="${op.value}" ${tipo === op.value ? "selected" : ""}>${op.label}</option>`).join("");
+}
+
+function renderPadraoSociais() {
+  const c = document.getElementById("listaPadraoSociais");
+  if (!c) return;
+  c.innerHTML = "";
+  SOCIAIS_PADRAO.forEach((s, i) => {
+    const ehOutros = s.tipo === "outros";
+    const div = document.createElement("div");
+    div.className = "item-bloco";
+    div.innerHTML = `
+      <span class="item-numero">Padrão ${i + 1}</span>
+      <button class="btn remover" onclick="removerPadraoSocial(${i})">✕ Remover</button>
+      <label>Tipo de rede</label>
+      <select onchange="SOCIAIS_PADRAO[${i}].tipo = this.value; renderPadraoSociais()">${opcoesTiposSociaisHTML(s.tipo)}</select>
+      <label>Nome exibido</label>
+      <input type="text" value="${s.nome || ""}" onchange="SOCIAIS_PADRAO[${i}].nome = this.value">
+      <label>URL</label>
+      <input type="text" value="${s.url || ""}" onchange="SOCIAIS_PADRAO[${i}].url = this.value">
+      <label>Cor do botão</label>
+      <input type="color" value="${s.cor || (REDES[s.tipo]?.cor || "#00ff80")}" onchange="SOCIAIS_PADRAO[${i}].cor = this.value">
+      <label>Estilo do botão</label>
+      <select onchange="SOCIAIS_PADRAO[${i}].estilo = this.value">
+        <option value="transparente" ${(s.estilo || "transparente") === "transparente" ? "selected" : ""}>Transparente com borda</option>
+        <option value="solido" ${s.estilo === "solido" ? "selected" : ""}>Sólido (preenchido)</option>
+      </select>
+      <div class="campos-outros ${ehOutros ? "aberto" : ""}">
+        <label>URL do logo (imagem)</label>
+        <input type="text" value="${s.logoUrl || ""}" placeholder="https://exemplo.com/logo.png" onchange="SOCIAIS_PADRAO[${i}].logoUrl = this.value">
+      </div>`;
+    c.appendChild(div);
+  });
+}
+
+function adicionarPadraoSocial() {
+  SOCIAIS_PADRAO.push({ tipo: "tiktok", nome: "NOVA REDE", url: "https://", cor: "#00ff80", estilo: "transparente" });
+  renderPadraoSociais();
+}
+function removerPadraoSocial(i) { SOCIAIS_PADRAO.splice(i, 1); renderPadraoSociais(); }
+
+function restaurarPadroesSociais() {
+  SOCIAIS_PADRAO = JSON.parse(JSON.stringify(SOCIAIS_PADRAO_FABRICA));
+  salvarPadroesSociais();
+  renderPadraoSociais();
+}
+
+function toggleLinksDownloadPadrao() {
+  LINKS_DOWNLOAD_ATIVOS = !LINKS_DOWNLOAD_ATIVOS;
+  const el = document.getElementById("chk-linksDownloadPadrao");
+  if (el) el.classList.toggle("ativo", LINKS_DOWNLOAD_ATIVOS);
+  localStorage.setItem(PADROES_CONTEUDO_KEY, JSON.stringify({
+    videos: VIDEOS_PADRAO, videoPrincipal: VIDEO_PRINCIPAL_PADRAO, shopee: SHOPEE_PADRAO, linksDownloadAtivos: LINKS_DOWNLOAD_ATIVOS
+  }));
+}
+
+function restaurarPadroesConteudo() {
+  if (!confirm("⚠️ Restaurar os padrões de vídeos e links para os valores originais?")) return;
+  VIDEOS_PADRAO = [...VIDEOS_PADRAO_FABRICA];
+  VIDEO_PRINCIPAL_PADRAO = [...VIDEO_PRINCIPAL_PADRAO_FABRICA];
+  SHOPEE_PADRAO = [...SHOPEE_PADRAO_FABRICA];
+  localStorage.setItem(PADROES_CONTEUDO_KEY, JSON.stringify({
+    videos: VIDEOS_PADRAO, videoPrincipal: VIDEO_PRINCIPAL_PADRAO, shopee: SHOPEE_PADRAO, linksDownloadAtivos: LINKS_DOWNLOAD_ATIVOS
+  }));
+  renderPadroesConteudo();
+}
+
+function mostrarTela(id) {
+  document.querySelectorAll(".tela").forEach(t => t.classList.remove("active"));
+  document.getElementById("tela-" + id).classList.add("active");
+  window.scrollTo({ top: 0 });
+}
+function voltarHub() { mostrarTela("hub"); renderHub(); }
+
+function renderHub() {
+  const c = document.getElementById("listaPaginas");
+  c.innerHTML = "";
+  if (paginas.length === 0) {
+    c.innerHTML = `<div class="vazio"><span class="emoji">🐼</span>Nenhuma página criada ainda.<br>Clique em <b>+ CRIAR NOVA PÁGINA</b> pra começar!</div>`;
+    return;
+  }
+  paginas.forEach((p, i) => {
+    const div = document.createElement("div");
+    div.className = "pagina-card";
+    div.innerHTML = `
+      <div class="pagina-nome">${p.nome || "Página Sem Nome"}</div>
+      <div class="pagina-info">Botões de Arquivos: ${p.downloads?.length || 0}</div>
+      <div class="pagina-acoes">
+        <button class="btn-acao btn-editar" onclick="editarPagina(${i})">🖊️ EDITAR</button>
+        <button class="btn-acao btn-codigo" onclick="verCodigo(${i})">💻 VER CÓDIGO HTML</button>
+        <button class="btn-acao btn-excluir" onclick="excluirPagina(${i})">🗑️</button>
+      </div>`;
+    c.appendChild(div);
+  });
+}
+
+function criarNovaPagina() {
+  modoEdicao = "nova"; paginaAtual = null;
+  document.getElementById("cfg-nomePagina").value = "Página Sem Nome";
+  // Os campos da nova página começam vazios. Os padrões continuam salvos na engrenagem.
+  document.getElementById("cfg-videoPrincipal").value = "";
+  document.getElementById("cfg-videoSugeridos").value = "";
+  document.getElementById("cfg-shopee").value = "";
+  // Por padrão, a nova página usa os padrões salvos + o que for adicionado manualmente.
+  chk = { videoPrincipal: true, videos: true, shopee: true, sociais: true };
+  document.getElementById("chk-videoPrincipalIncluirPadroes").classList.add("ativo");
+  document.getElementById("chk-videosIncluirPadroes").classList.add("ativo");
+  document.getElementById("chk-shopeeIncluirPadroes").classList.add("ativo");
+  downloads = JSON.parse(JSON.stringify(DOWNLOADS_PADRAO_FABRICA));
+  // As redes padrão ficam na engrenagem; a nova página começa sem redes personalizadas.
+  sociais = [];
+  chk.sociais = true;
+  document.getElementById("chk-sociaisIncluirPadroes").classList.add("ativo");
+  resetarAnuncios();
+  document.getElementById("editorTitulo").textContent = "Criando: Nova Página";
+  renderDownloads(); renderSociais(); renderAnuncios();
+  mostrarTela("editor");
+}
+
+function editarPagina(i) {
+  modoEdicao = "editar"; paginaAtual = i;
+  const p = paginas[i];
+  document.getElementById("cfg-nomePagina").value = p.nome || "";
+  document.getElementById("cfg-videoPrincipal").value = (p.videoPrincipal || []).join("\n");
+  document.getElementById("cfg-videoSugeridos").value = (p.videoSugeridosCustom || []).join("\n");
+  document.getElementById("cfg-shopee").value = (p.shopeeCustom || []).join("\n");
+  chk = {
+    videoPrincipal: p.incluirPadroesVideoPrincipal !== false,
+    videos: p.incluirPadroesVideos !== false,
+    shopee: p.incluirPadroesShopee !== false,
+    sociais: p.incluirPadroesSociais === true
+  };
+  document.getElementById("chk-videoPrincipalIncluirPadroes").classList.toggle("ativo", chk.videoPrincipal);
+  document.getElementById("chk-videosIncluirPadroes").classList.toggle("ativo", chk.videos);
+  document.getElementById("chk-shopeeIncluirPadroes").classList.toggle("ativo", chk.shopee);
+  document.getElementById("chk-sociaisIncluirPadroes").classList.toggle("ativo", chk.sociais);
+  downloads = JSON.parse(JSON.stringify(p.downloads || []));
+  sociais = JSON.parse(JSON.stringify(p.sociais || []));
+  aplicarAnunciosSalvos(p.anuncios);
+  document.getElementById("editorTitulo").textContent = "Editando: " + (p.nome || "Página");
+  renderDownloads(); renderSociais(); renderAnuncios();
+  mostrarTela("editor");
+}
+
+function excluirPagina(i) {
+  if (!confirm('⚠️ Apagar "' + (paginas[i].nome || "esta página") + '" pra sempre?')) return;
+  paginas.splice(i, 1); salvarNoStorage(); renderHub();
+}
+
+function verCodigo(i) {
+  const p = paginas[i];
+  aplicarAnunciosSalvos(p.anuncios);
+  const html = construirHTML(p);
+  document.getElementById("codigoSaida").value = html;
+  document.getElementById("codigoTitulo").textContent = "⚡ Código Pronto: " + (p.nome || "Página");
+  mostrarTela("codigo");
+}
+
+function renderDownloads() {
+  const c = document.getElementById("listaDownloads");
+  c.innerHTML = "";
+  downloads.forEach((dl, i) => {
+    const div = document.createElement("div");
+    div.className = "item-bloco";
+    div.innerHTML = `
+      <span class="item-numero">Download ${i + 1}</span>
+      <button class="btn remover" onclick="removerDownload(${i})">✕ Remover</button>
+      <label>ID único (sem espaços)</label>
+      <input type="text" value="${dl.id}" onchange="downloads[${i}].id = this.value">
+      <label>Nome exibido</label>
+      <input type="text" value="${dl.nome}" onchange="downloads[${i}].nome = this.value">
+      <label>Link final (após contagem)</label>
+      <input type="text" value="${dl.linkFinal}" onchange="downloads[${i}].linkFinal = this.value">
+      <div class="campo-hint">💡 Os links de intermediação são configurados na seção de links acima.</div>`;
+    c.appendChild(div);
+  });
+}
+
+function adicionarDownload() {
+  downloads.push({ id: "novo" + (downloads.length + 1), nome: "Novo Download", linkFinal: "https://drive.google.com/" });
+  renderDownloads();
+}
+function removerDownload(i) {
+  if (downloads.length === 1) { alert("Precisa ter pelo menos 1 download!"); return; }
+  downloads.splice(i, 1); renderDownloads();
+}
+
+function renderSociais() {
+  const c = document.getElementById("listaSociais");
+  c.innerHTML = "";
+  sociais.forEach((s, i) => {
+    const ehOutros = s.tipo === "outros";
+    const div = document.createElement("div");
+    div.className = "item-bloco";
+    div.innerHTML = `
+      <span class="item-numero">Rede ${i + 1}</span>
+      <button class="btn remover" onclick="removerSocial(${i})">✕ Remover</button>
+      <label>Tipo de rede</label>
+      <select onchange="mudarTipoSocial(${i}, this.value)">${opcoesTiposSociaisHTML(s.tipo)}</select>
+      <label>Nome exibido</label>
+      <input type="text" value="${s.nome || ""}" onchange="sociais[${i}].nome = this.value">
+      <label>URL</label>
+      <input type="text" value="${s.url || ""}" onchange="sociais[${i}].url = this.value">
+      <label>Cor do botão</label>
+      <input type="color" value="${s.cor || (REDES[s.tipo]?.cor || "#00ff80")}" onchange="sociais[${i}].cor = this.value">
+      <label>Estilo do botão</label>
+      <select onchange="sociais[${i}].estilo = this.value">
+        <option value="transparente" ${(s.estilo || "transparente") === "transparente" ? "selected" : ""}>Transparente com borda</option>
+        <option value="solido" ${s.estilo === "solido" ? "selected" : ""}>Sólido (preenchido)</option>
+      </select>
+      <div class="campos-outros ${ehOutros ? "aberto" : ""}">
+        <div style="color:var(--tema);font-weight:700;font-size:0.82rem;margin-bottom:10px;">🔗 Personalizado</div>
+        <label>URL do logo (imagem)</label>
+        <input type="text" value="${s.logoUrl || ""}" placeholder="https://exemplo.com/logo.png" onchange="sociais[${i}].logoUrl = this.value">
+      </div>`;
+    c.appendChild(div);
+  });
+}
+
+function mudarTipoSocial(i, novo) { sociais[i].tipo = novo; renderSociais(); }
+function adicionarSocial() { sociais.push({ tipo: "tiktok", nome: "NOVA", url: "https://", cor: REDES.tiktok.cor, estilo: "transparente" }); renderSociais(); }
+function removerSocial(i) { sociais.splice(i, 1); renderSociais(); }
+
+function coletarConfig() {
+  const vp = document.getElementById("cfg-videoPrincipal").value.split("\n").map(l => l.trim()).filter(l => l).map(l => extrairIdYoutube(l)).filter(l => l);
+  const vs = document.getElementById("cfg-videoSugeridos").value.split("\n").map(l => l.trim()).filter(l => l).map(l => extrairIdYoutube(l)).filter(l => l);
+  const sp = document.getElementById("cfg-shopee").value.split("\n").map(l => l.trim()).filter(l => l);
+  return {
+    nome: document.getElementById("cfg-nomePagina").value || "Página Sem Nome",
+    nomeCanal: NOME_CANAL_PADRAO,
+    subtitulo: SUBTITULO_PADRAO,
+    logoUrl: LOGO_PADRAO,
+    videoPrincipal: vp,
+    videoSugeridosCustom: vs,
+    shopeeCustom: sp,
+    linksDownloadAtivos: LINKS_DOWNLOAD_ATIVOS,
+    incluirPadroesVideoPrincipal: chk.videoPrincipal,
+    incluirPadroesVideos: chk.videos,
+    incluirPadroesShopee: chk.shopee,
+    incluirPadroesSociais: chk.sociais,
+    downloads: downloads,
+    sociais: sociais,
+    anuncios: Object.fromEntries(ADS_INFO.map(ad => [ad.id, { ativo: anuncios[ad.id]?.ativo !== false }])),
+    criadoEm: new Date().toISOString()
+  };
+}
+
+function salvarPagina() {
+  const config = coletarConfig();
+  if (config.downloads.length === 0) { alert("⚠️ Adicione pelo menos 1 download!"); return; }
+  if (modoEdicao === "editar" && paginaAtual !== null) {
+    config.criadoEm = paginas[paginaAtual].criadoEm || config.criadoEm;
+    paginas[paginaAtual] = config;
+  } else {
+    paginas.push(config);
+  }
+  salvarNoStorage();
+  const html = construirHTML(config);
+  document.getElementById("codigoSaida").value = html;
+  document.getElementById("codigoTitulo").textContent = "⚡ Código Pronto: " + (config.nome || "Página");
+  mostrarTela("codigo");
+}
+
+function montarVideosSugeridos(c) {
+  const custom = c.videoSugeridosCustom || [];
+  if (c.incluirPadroesVideos === false) return custom;
+  return [...new Set([...VIDEOS_PADRAO, ...custom])];
+}
+function montarShopee(c) {
+  const custom = c.shopeeCustom || [];
+  if (c.incluirPadroesShopee === false) return custom;
+  return [...new Set([...SHOPEE_PADRAO, ...custom])];
+}
+function montarVideosPrincipais(c) {
+  const custom = c.videoPrincipal || [];
+  if (c.incluirPadroesVideoPrincipal === false) return custom;
+  return [...new Set([...VIDEO_PRINCIPAL_PADRAO, ...custom])];
+}
+function montarSociais(c) {
+  const custom = c.sociais || [];
+  if (c.incluirPadroesSociais === false) return custom;
+  return [...SOCIAIS_PADRAO, ...custom];
+}
+
+function construirHTML(c) {
+  aplicarAnunciosSalvos(c.anuncios);
+  const a = {};
+  ADS_INFO.forEach(ad => { a[ad.id] = { ativo: anuncios[ad.id].ativo, cfg: pegarConfig(ad) }; });
+
+  const videosSugeridos = montarVideosSugeridos(c);
+  const linksDownload = montarShopee(c);
+  const videosPrincipais = montarVideosPrincipais(c);
+  const sociaisFinais = montarSociais(c);
+
+  const downloadsJSON = JSON.stringify(c.downloads, null, 2);
+  const sociaisJSON = JSON.stringify(sociaisFinais, null, 2);
+  const videosSugeridosJSON = JSON.stringify(videosSugeridos, null, 2);
+  const videosPrincipaisJSON = JSON.stringify(videosPrincipais, null, 2);
+  const shopeeJSON = JSON.stringify(linksDownload, null, 2);
+  const logoUrlJSON = JSON.stringify(LOGO_PADRAO || c.logoUrl || "");
+  const redesJSON = JSON.stringify(REDES, null, 2);
+  const temaJSON = JSON.stringify(tema);
+  const fontesJSON = JSON.stringify(FONTES, null, 2);
+
+  const adTopoHTML = a.topo.ativo ? `
+    <script type="text/javascript">
+      atOptions = { 'key' : '${a.topo.cfg.key}', 'format' : 'iframe', 'height' : ${a.topo.cfg.height}, 'width' : ${a.topo.cfg.width}, 'params' : {} };
+    <\/script>
+    <script type="text/javascript" src="https://www.highrevenueformat.com/${a.topo.cfg.key}/invoke.js"><\/script>
+  ` : "<!-- Anúncio topo desativado -->";
+
+  const adNativoP1HTML = a.nativoP1.ativo ? `
+    <script async="async" data-cfasync="false" src="https://${a.nativoP1.cfg.src}/${a.nativoP1.cfg.key}/invoke.js"><\/script>
+    <div id="container-${a.nativoP1.cfg.key}"></div>
+  ` : "<!-- Anúncio nativo desativado -->";
+
+  const adBannerP2HTML = a.bannerP2.ativo ? `
+    <script type="text/javascript">
+      atOptions = { 'key' : '${a.bannerP2.cfg.key}', 'format' : 'iframe', 'height' : ${a.bannerP2.cfg.height}, 'width' : ${a.bannerP2.cfg.width}, 'params' : {} };
+    <\/script>
+    <script type="text/javascript" src="https://www.highrevenueformat.com/${a.bannerP2.cfg.key}/invoke.js"><\/script>
+  ` : "<!-- Banner pág 2 desativado -->";
+
+  const adRodapeP1HTML = a.rodapeP1.ativo ? `
+    <script type="text/javascript">
+      atOptions = { 'key' : '${a.rodapeP1.cfg.key}', 'format' : 'iframe', 'height' : ${a.rodapeP1.cfg.height}, 'width' : ${a.rodapeP1.cfg.width}, 'params' : {} };
+    <\/script>
+    <script type="text/javascript" src="https://www.highrevenueformat.com/${a.rodapeP1.cfg.key}/invoke.js"><\/script>
+  ` : "<!-- Rodapé pág 1 desativado -->";
+
+  const adRodapeP2HTML = a.rodapeP2.ativo ? `
+    <script type="text/javascript">
+      atOptions = { 'key' : '${a.rodapeP2.cfg.key}', 'format' : 'iframe', 'height' : ${a.rodapeP2.cfg.height}, 'width' : ${a.rodapeP2.cfg.width}, 'params' : {} };
+    <\/script>
+    <script type="text/javascript" src="https://www.highrevenueformat.com/${a.rodapeP2.cfg.key}/invoke.js"><\/script>
+  ` : "<!-- Rodapé pág 2 desativado -->";
+
+  const adPopunderHTML = a.popunder.ativo ? `<script type="text/javascript" src="${a.popunder.cfg.src}"><\/script>` : "<!-- Popunder desativado -->";
+  const adSocialBarHTML = a.socialbar.ativo ? `<script type="text/javascript" src="${a.socialbar.cfg.src}"><\/script>` : "<!-- Social Bar desativado -->";
+
+  return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${c.nomeCanal || "Panda Ansioso"}</title>
+${adPopunderHTML}
+${adSocialBarHTML}
+<style>
+  :root {
+    --tema: #00ff80; --tema-escuro: #00b359; --tema-rgb: 0, 255, 128;
+    --fundo: #0a0f0a;
+    --titulo-fonte: 'Segoe UI', system-ui, sans-serif;
+    --titulo-peso: 800; --titulo-estilo: normal; --titulo-tamanho: 1.9rem;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+  body {
+    min-height: 100vh; background: var(--fundo);
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(var(--tema-rgb), 0.15), transparent 40%),
+      radial-gradient(circle at 85% 70%, rgba(var(--tema-rgb), 0.12), transparent 45%);
+    color: #e8ffe8; padding: 20px; overflow-x: hidden;
+  }
+  .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(14px); border: 1px solid rgba(var(--tema-rgb), 0.25); border-radius: 18px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); }
+  .ad-top, .ad-native, .ad-footer {
+    max-width: 1100px; margin: 0 auto 20px; padding: 8px;
+    background: rgba(255, 255, 255, 0.03); border: 1px dashed rgba(var(--tema-rgb), 0.2);
+    border-radius: 14px; display: flex; justify-content: center; align-items: center; overflow: hidden; min-height: 90px;
+  }
+  .ad-native { min-height: 100px; margin-bottom: 30px; }
+  .ad-footer { min-height: 60px; }
+  .ad-top iframe, .ad-top img, .ad-top ins,
+  .ad-native iframe, .ad-native img, .ad-native ins, .ad-native div,
+  .ad-footer iframe, .ad-footer img, .ad-footer ins { max-width: 100%; display: block; }
+  header { max-width: 1100px; margin: 0 auto 25px; padding: 20px 25px; display: flex; align-items: center; gap: 18px; }
+  .logo { width: 65px; height: 65px; border-radius: 50%; background: linear-gradient(135deg, var(--tema), var(--tema-escuro)); display: flex; align-items: center; justify-content: center; font-size: 34px; box-shadow: 0 0 25px rgba(var(--tema-rgb), 0.5); flex-shrink: 0; overflow: hidden; }
+  .logo img { width: 100%; height: 100%; object-fit: cover; }
+  .titulo-linha { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .titulo-linha h1 { margin: 0; }
+  .titulo-linha .subtitulo { color: #7fa887; font-size: 0.9rem; }
+  header h1 { font-family: var(--titulo-fonte); font-weight: var(--titulo-peso); font-style: var(--titulo-estilo); font-size: var(--titulo-tamanho); color: var(--tema); letter-spacing: 0.5px; text-shadow: 0 0 20px rgba(var(--tema-rgb), 0.4); }
+  header h1.contorno { -webkit-text-fill-color: transparent; -webkit-text-stroke: 2px var(--tema); text-shadow: none; }
+  header h1.sombra { text-shadow: 0 0 10px var(--tema), 0 0 20px var(--tema), 0 0 30px var(--tema); }
+  header h1.tresd { text-shadow: 3px 3px 0 var(--tema-escuro), 6px 6px 0 rgba(0,0,0,0.4); }
+  header p { color: #9fdcb0; font-size: 0.9rem; margin-top: 2px; }
+  section { max-width: 1100px; margin: 0 auto 30px; padding: 22px; }
+  .section-title { font-size: 1.3rem; color: var(--tema); margin-bottom: 18px; display: flex; align-items: center; gap: 10px; font-weight: 700; }
+  .player-wrap { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; border: 1px solid rgba(var(--tema-rgb), 0.3); box-shadow: 0 0 30px rgba(var(--tema-rgb), 0.15); }
+  .player-wrap iframe { width: 100%; height: 100%; border: 0; }
+  .thumbs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 18px; }
+  .thumb { position: relative; border-radius: 12px; overflow: hidden; cursor: pointer; border: 1px solid rgba(var(--tema-rgb), 0.2); transition: all 0.25s; background: rgba(0, 0, 0, 0.3); display: flex; flex-direction: column; }
+  .thumb:hover { transform: translateY(-4px); border-color: var(--tema); box-shadow: 0 8px 25px rgba(var(--tema-rgb), 0.35); }
+  .thumb-img { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: #111; }
+  .thumb-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .thumb-img::after { content: "▶"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.35); color: var(--tema); font-size: 2rem; opacity: 0; transition: opacity 0.25s; }
+  .thumb:hover .thumb-img::after { opacity: 1; }
+  .thumb-title { font-size: 0.78rem; color: #c8ffd8; padding: 8px 10px; line-height: 1.3; font-weight: 500; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 42px; }
+  .thumb.hidden { display: none; }
+  .btn-vermais { display: block; margin: 20px auto 0; padding: 12px 32px; background: rgba(var(--tema-rgb), 0.1); border: 1px solid var(--tema); color: var(--tema); border-radius: 30px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.25s; }
+  .btn-vermais:hover { background: var(--tema); color: #0a0f0a; box-shadow: 0 0 25px rgba(var(--tema-rgb), 0.6); }
+  .download-item { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 16px 20px; margin-bottom: 12px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(var(--tema-rgb), 0.22); border-radius: 14px; transition: all 0.25s; }
+  .download-item:hover { border-color: rgba(var(--tema-rgb), 0.5); background: rgba(var(--tema-rgb), 0.06); }
+  .download-name { font-size: 1.05rem; font-weight: 600; color: #d8ffe0; display: flex; align-items: center; gap: 10px; }
+  .download-name::before { content: "📦"; font-size: 1.2rem; }
+  .btn-download { display: flex; align-items: center; gap: 10px; padding: 12px 28px; background: transparent; color: var(--tema); border: 2px solid var(--tema); border-radius: 12px; font-weight: 800; font-size: 0.95rem; cursor: pointer; transition: all 0.25s; white-space: nowrap; letter-spacing: 1px; box-shadow: 0 0 15px rgba(var(--tema-rgb), 0.3); text-transform: uppercase; }
+  .btn-download svg { width: 16px; height: 16px; fill: currentColor; }
+  .btn-download:hover { background: rgba(var(--tema-rgb), 0.1); box-shadow: 0 0 25px rgba(var(--tema-rgb), 0.6); transform: translateY(-2px); }
+  .btn-download.progress-mode { position: relative; padding: 0; overflow: hidden; cursor: default; justify-content: center; min-width: 200px; height: 46px; transition: none; }
+  .btn-download.progress-mode:hover { transform: none; background: transparent; }
+  .btn-download .progress-fill-btn { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: linear-gradient(90deg, var(--tema), var(--tema-escuro)); box-shadow: 0 0 20px rgba(var(--tema-rgb), 0.7); transition: width 0.9s linear; }
+  .btn-download .progress-label-btn { position: relative; z-index: 2; display: flex; align-items: center; gap: 8px; padding: 12px 20px; font-weight: 800; font-size: 0.95rem; color: #0a0f0a; text-transform: uppercase; letter-spacing: 1px; }
+  .page2-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+  .btn-voltar { display: flex; align-items: center; gap: 8px; padding: 10px 20px; background: rgba(var(--tema-rgb), 0.1); border: 1px solid var(--tema); color: var(--tema); border-radius: 30px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.25s; text-decoration: none; }
+  .btn-voltar:hover { background: var(--tema); color: #0a0f0a; box-shadow: 0 0 20px rgba(var(--tema-rgb), 0.6); }
+  .progress-wrap { position: relative; width: 100%; height: 60px; background: rgba(var(--tema-rgb), 0.08); border: 2px solid var(--tema); border-radius: 14px; overflow: hidden; box-shadow: 0 0 20px rgba(var(--tema-rgb), 0.3); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.25s; }
+  .progress-wrap.waiting { border-color: #ffcc00; box-shadow: 0 0 20px rgba(255, 204, 0, 0.4); animation: pulse 1s infinite; }
+  .progress-wrap:hover:not(.running):not(.waiting) { background: rgba(var(--tema-rgb), 0.15); }
+  .progress-wrap.running { cursor: default; }
+  .progress-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: linear-gradient(90deg, var(--tema), var(--tema-escuro)); transition: width 0.9s linear; box-shadow: 0 0 25px rgba(var(--tema-rgb), 0.7); }
+  .progress-text { position: relative; z-index: 2; display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1rem; color: var(--tema); text-transform: uppercase; letter-spacing: 1px; }
+  .progress-text svg { width: 18px; height: 18px; fill: currentColor; }
+  .progress-wrap.running .progress-text { color: #0a0f0a; }
+  @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+  .socials { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .social-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 12px; border-radius: 14px; text-decoration: none; font-weight: 700; font-size: 0.9rem; transition: all 0.25s; border: 2px solid transparent; text-align: center; letter-spacing: 0.5px; }
+  .social-btn svg, .social-btn img { width: 22px; height: 22px; fill: currentColor; flex-shrink: 0; object-fit: contain; }
+  .social-btn:hover { transform: translateY(-3px); }
+  footer { text-align: center; padding: 25px 15px; color: #6fa87d; font-size: 0.85rem; }
+  .page { display: none; opacity: 0; transform: translateX(25px); transition: opacity 0.9s ease, transform 0.9s cubic-bezier(0.25, 0.8, 0.25, 1); }
+  .page.active { display: block; opacity: 1; transform: translateX(0); }
+  .page.saindo { display: block; opacity: 0; transform: translateX(-25px); pointer-events: none; position: absolute; left: 0; right: 0; }
+  .page.entrando { display: block; opacity: 0; transform: translateX(25px); }
+  @media (max-width: 640px) {
+    header { flex-direction: column; text-align: center; padding: 18px; }
+    header h1 { font-size: 1.5rem; }
+    .thumb-title { font-size: 0.68rem; padding: 6px 7px; min-height: 36px; }
+    .download-item { flex-direction: column; align-items: stretch; text-align: center; }
+    .download-name { justify-content: center; }
+    .btn-download { width: 100%; justify-content: center; }
+    .btn-download.progress-mode { min-width: 100%; }
+    .socials { grid-template-columns: repeat(2, 1fr); }
+    .social-btn { font-size: 0.8rem; padding: 12px 8px; }
+    .progress-wrap { height: 55px; }
+    .progress-text { font-size: 0.9rem; }
+    .ad-top { min-height: 60px; padding: 4px; }
+    .ad-native { min-height: 80px; padding: 8px; }
+    .ad-footer { min-height: 50px; padding: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page active" id="page1">
+
+  <div class="ad-top">${adTopoHTML}</div>
+
+  <header class="glass">
+    <div class="logo" id="logo1">🐼</div>
+    <div>
+      <div class="titulo-linha"><h1 id="tituloP1">${c.nomeCanal}</h1><span class="subtitulo">${c.subtitulo || ""}</span></div>
+    </div>
+  </header>
+
+  <section class="glass">
+    <h2 class="section-title">🎬 Vídeos</h2>
+    <div class="player-wrap">
+      <iframe id="player1" src="https://www.youtube.com/embed/${videosPrincipais[0]}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+    <div class="thumbs" id="thumbs1"></div>
+    <button class="btn-vermais" data-target="1">Ver mais ▼</button>
+  </section>
+
+  <div class="ad-native">${adNativoP1HTML}</div>
+
+  <section class="glass">
+    <h2 class="section-title">⬇️ Downloads</h2>
+    <div id="downloadsList1"></div>
+  </section>
+
+  <section class="glass">
+    <h2 class="section-title">📱 Siga minhas redes sociais:</h2>
+    <div class="socials" id="socials1"></div>
+  </section>
+
+  <div class="ad-footer">${adRodapeP1HTML}</div>
+
+  <footer>© 2026 ${c.nomeCanal} — Todos os direitos reservados 🐼</footer>
+</div>
+
+<div class="page" id="page2">
+
+  <div class="ad-top">${adTopoHTML}</div>
+
+  <header class="glass">
+    <div class="logo" id="logo2">🐼</div>
+    <div>
+      <h1 id="tituloP2">${c.nomeCanal}</h1>
+      <p>Download em andamento 🐼💚</p>
+    </div>
+  </header>
+
+  <section class="glass">
+    <div class="page2-header"><a class="btn-voltar" href="#" onclick="voltarPagina1(event)">⬅ Voltar</a></div>
+    <h2 class="section-title">📦 <span id="nomeArquivo">Arquivo</span></h2>
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-fill" id="progressFill"></div>
+      <div class="progress-text">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 1a5 5 0 0 0-5 5v3H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-2V6a5 5 0 0 0-5-5zm-3 8V6a3 3 0 1 1 6 0v3H9zm3 4a2 2 0 0 1 1 3.732V18a1 1 0 0 1-2 0v-1.268A2 2 0 0 1 12 13z"/></svg>
+        <span id="progressLabel">Download</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="glass">
+    <h2 class="section-title">🎬 Vídeos sugeridos</h2>
+    <div class="player-wrap">
+      <iframe id="player2" src="https://www.youtube.com/embed/${videosPrincipais[0]}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+    <div class="thumbs" id="thumbs2"></div>
+    <button class="btn-vermais" data-target="2">Ver mais ▼</button>
+  </section>
+
+  <div class="ad-native">${adBannerP2HTML}</div>
+
+  <section class="glass">
+    <h2 class="section-title">⬇️ Outros downloads</h2>
+    <div id="downloadsList2"></div>
+  </section>
+
+  <section class="glass">
+    <h2 class="section-title">📱 Siga minhas redes sociais:</h2>
+    <div class="socials" id="socials2"></div>
+  </section>
+
+  <div class="ad-footer">${adRodapeP2HTML}</div>
+
+  <footer>© 2026 ${c.nomeCanal} — Todos os direitos reservados 🐼</footer>
+</div>
+
+<script>
+const TEMA = ${temaJSON};
+const FONTES = ${fontesJSON};
+
+(function(){
+  const hsl = (function(hex){
+    hex = hex.replace("#", "");
+    const r = parseInt(hex.substr(0,2),16)/255, g = parseInt(hex.substr(2,2),16)/255, b = parseInt(hex.substr(4,2),16)/255;
+    const max = Math.max(r,g,b), min = Math.min(r,g,b);
+    let h, s, l = (max+min)/2;
+    if (max===min){h=s=0;} else {
+      const d = max-min; s = l>0.5?d/(2-max-min):d/(max+min);
+      switch(max){ case r: h=(g-b)/d+(g<b?6:0); break; case g: h=(b-r)/d+2; break; case b: h=(r-g)/d+4; break; }
+      h/=6;
+    }
+    return { h: Math.round(h*360), s: Math.round(s*100), l: Math.round(l*100) };
+  })(TEMA.cor);
+  const root = document.documentElement;
+  root.style.setProperty("--tema", TEMA.cor);
+  root.style.setProperty("--tema-escuro", \`hsl(\${hsl.h}, \${hsl.s}%, \${Math.max(10, hsl.l + TEMA.tom - 20)}%)\`);
+  root.style.setProperty("--tema-rgb", (function(hex){
+    hex = hex.replace("#","");
+    return \`\${parseInt(hex.substr(0,2),16)}, \${parseInt(hex.substr(2,2),16)}, \${parseInt(hex.substr(4,2),16)}\`;
+  })(TEMA.cor));
+  root.style.setProperty("--fundo", TEMA.fundo);
+  root.style.setProperty("--titulo-fonte", FONTES[TEMA.fonteForma] || FONTES.padrao);
+  root.style.setProperty("--titulo-peso", TEMA.fonteEstilo.includes("bold") ? "800" : "500");
+  root.style.setProperty("--titulo-estilo", TEMA.fonteEstilo.includes("italic") ? "italic" : "normal");
+  root.style.setProperty("--titulo-tamanho", TEMA.fonteTamanho + "rem");
+  // Aplica efeito no título
+  ["tituloP1", "tituloP2"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      if (TEMA.fonteEfeito === "contorno") el.classList.add("contorno");
+      if (TEMA.fonteEfeito === "sombra") el.classList.add("sombra");
+      if (TEMA.fonteEfeito === "3d") el.classList.add("tresd");
+    }
+  });
+})();
+
+const videosPrincipais = ${videosPrincipaisJSON};
+const videosSugeridos = ${videosSugeridosJSON};
+const downloads = ${downloadsJSON};
+const socialLinks = ${sociaisJSON};
+const linksDownload = ${shopeeJSON};
+const linksDownloadAtivos = ${JSON.stringify(c.linksDownloadAtivos !== false)};
+const logoUrl = ${logoUrlJSON};
+const REDES = ${redesJSON};
+
+const svgCadeado = \`<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 1a5 5 0 0 0-5 5v3H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-2V6a5 5 0 0 0-5-5zm-3 8V6a3 3 0 1 1 6 0v3H9zm3 4a2 2 0 0 1 1 3.732V18a1 1 0 0 1-2 0v-1.268A2 2 0 0 1 12 13z"/></svg>\`;
+
+const titulosCache = {};
+async function buscarTitulo(id) {
+  if (titulosCache[id]) return titulosCache[id];
+  try {
+    const resp = await fetch(\`https://noembed.com/embed?url=https://www.youtube.com/watch?v=\${id}\`);
+    const data = await resp.json();
+    titulosCache[id] = data.title || "Vídeo";
+    return titulosCache[id];
+  } catch { return "Vídeo"; }
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function aplicarPrincipal() {
+  const escolhido = videosPrincipais[Math.floor(Math.random() * videosPrincipais.length)];
+  document.getElementById('player1').src = \`https://www.youtube.com/embed/\${escolhido}\`;
+  document.getElementById('player2').src = \`https://www.youtube.com/embed/\${escolhido}\`;
+}
+
+function aplicarLogo() {
+  if (!logoUrl) return;
+  const html = \`<img src="\${logoUrl}" alt="Logo" onerror="this.parentElement.innerHTML='🐼'">\`;
+  const l1 = document.getElementById('logo1');
+  const l2 = document.getElementById('logo2');
+  if (l1) l1.innerHTML = html;
+  if (l2) l2.innerHTML = html;
+}
+
+function renderVideos(thumbsId, playerId) {
+  const container = document.getElementById(thumbsId);
+  const player = document.getElementById(playerId);
+  const sugestoes = shuffle(videosSugeridos);
+  container.innerHTML = "";
+  sugestoes.forEach((id, i) => {
+    const div = document.createElement("div");
+    div.className = "thumb" + (i >= 3 ? " hidden" : "");
+    div.innerHTML = \`<div class="thumb-img"><img src="https://img.youtube.com/vi/\${id}/mqdefault.jpg"></div><div class="thumb-title" data-id="\${id}">Carregando...</div>\`;
+    div.onclick = () => { player.src = \`https://www.youtube.com/embed/\${id}?autoplay=1\`; window.scrollTo({ top: 0, behavior: "smooth" }); };
+    container.appendChild(div);
+    if (!titulosCache[id]) {
+      buscarTitulo(id).then(t => { const el = container.querySelector(\`.thumb-title[data-id="\${id}"]\`); if (el) el.textContent = t; });
+    } else {
+      div.querySelector(".thumb-title").textContent = titulosCache[id];
+    }
+  });
+}
+
+document.querySelectorAll(".btn-vermais").forEach(btn => {
+  const container = document.getElementById("thumbs" + btn.dataset.target);
+  btn.addEventListener("click", () => {
+    const hidden = container.querySelectorAll(".thumb.hidden");
+    if (hidden.length > 0) { hidden.forEach(t => t.classList.remove("hidden")); btn.textContent = "Ver menos ▲"; }
+    else { container.querySelectorAll(".thumb").forEach((t, i) => { if (i >= 3) t.classList.add("hidden"); }); btn.textContent = "Ver mais ▼"; }
+  });
+});
+
+aplicarPrincipal();
+aplicarLogo();
+renderVideos("thumbs1", "player1");
+renderVideos("thumbs2", "player2");
+
+function renderSocials(containerId) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = "";
+  socialLinks.forEach(s => {
+    const a = document.createElement("a");
+    a.href = s.url; a.target = "_blank"; a.className = "social-btn";
+    const rede = REDES[s.tipo];
+    const cor = s.cor || (rede ? rede.cor : "#00ff80");
+    const estilo = s.estilo || "transparente";
+    if (estilo === "solido") {
+      a.style.background = cor; a.style.borderColor = cor; a.style.color = "#fff";
+    } else {
+      a.style.background = cor + "10"; a.style.borderColor = cor; a.style.color = cor; a.style.boxShadow = \`0 0 15px \${cor}30\`;
+    }
+    if (s.tipo === "outros") {
+      a.innerHTML = \`\${s.logoUrl ? \`<img src="\${s.logoUrl}">\` : "🔗"} \${s.nome}\`;
+    } else {
+      if (!rede) return;
+      a.innerHTML = \`\${rede.svg} \${s.nome}\`;
+    }
+    c.appendChild(a);
+  });
+}
+
+renderSocials("socials1");
+renderSocials("socials2");
+
+function trocarPagina(paginaSaindo, paginaEntrando) {
+  document.querySelectorAll(".page").forEach(p => {
+    if (p !== paginaEntrando) { p.classList.remove("active","saindo","entrando"); p.style.display = "none"; p.style.opacity = ""; p.style.transform = ""; p.style.position = ""; p.style.left = ""; p.style.right = ""; }
+  });
+  paginaEntrando.style.display = "block";
+  paginaEntrando.classList.remove("saindo");
+  paginaEntrando.classList.add("entrando");
+  requestAnimationFrame(() => { requestAnimationFrame(() => { paginaEntrando.classList.remove("entrando"); paginaEntrando.classList.add("active"); }); });
+  if (paginaSaindo && paginaSaindo !== paginaEntrando) {
+    paginaSaindo.classList.add("saindo");
+    paginaSaindo.classList.remove("active");
+    setTimeout(() => { paginaSaindo.classList.remove("saindo"); paginaSaindo.style.display = "none"; }, 900);
+  }
+}
+
+function criarItemDownload(dl) {
+  const item = document.createElement("div");
+  item.className = "download-item";
+  const nome = document.createElement("div");
+  nome.className = "download-name";
+  nome.textContent = dl.nome;
+  const btn = document.createElement("button");
+  btn.className = "btn-download";
+  btn.innerHTML = \`\${svgCadeado} <span>Download</span>\`;
+  btn.onclick = () => iniciarProgressoBotao(dl, btn);
+  item.appendChild(nome); item.appendChild(btn);
+  return item;
+}
+
+function iniciarProgressoBotao(dl, btn) {
+  if (btn.classList.contains("progress-mode")) return;
+  const segundos = Math.floor(Math.random() * 3) + 5;
+  btn.classList.add("progress-mode", "running");
+  btn.innerHTML = \`<div class="progress-fill-btn"></div><div class="progress-label-btn">Aguarde... \${segundos}s</div>\`;
+  const fill = btn.querySelector(".progress-fill-btn");
+  const label = btn.querySelector(".progress-label-btn");
+  let passados = 0;
+  const timer = setInterval(() => {
+    passados++;
+    fill.style.width = Math.min(100, (passados / segundos) * 100) + "%";
+    const falta = segundos - passados;
+    if (falta > 0) { label.textContent = \`Aguarde... \${falta}s\`; }
+    else { clearInterval(timer); label.textContent = "Entrando..."; setTimeout(() => irParaContagem(dl), 400); }
+  }, 1000);
+}
+
+function renderDownloadsPage1() {
+  const c = document.getElementById("downloadsList1"); c.innerHTML = "";
+  downloads.forEach(dl => c.appendChild(criarItemDownload(dl)));
+}
+
+function renderDownloadsPage2(excluirId) {
+  const c = document.getElementById("downloadsList2"); c.innerHTML = "";
+  const outros = downloads.filter(d => d.id !== excluirId);
+  if (outros.length === 0) { c.innerHTML = \`<p style="color:#9fdcb0;font-size:0.9rem;text-align:center;">Nenhum outro download disponível.</p>\`; return; }
+  outros.forEach(dl => c.appendChild(criarItemDownload(dl)));
+}
+
+let downloadAtual = null, contagemEmAndamento = false, jaAbriuLinkDownload = false;
+const progressWrap = document.getElementById("progressWrap");
+const progressFill = document.getElementById("progressFill");
+const progressLabel = document.getElementById("progressLabel");
+const nomeArquivo = document.getElementById("nomeArquivo");
+
+function irParaContagem(dl) {
+  downloadAtual = dl; jaAbriuLinkDownload = false; contagemEmAndamento = false;
+  nomeArquivo.textContent = dl.nome;
+  progressFill.style.width = "0%";
+  progressWrap.classList.remove("running", "waiting");
+  progressWrap.style.cursor = "pointer";
+  progressLabel.textContent = "Download";
+  renderDownloadsPage2(dl.id);
+  trocarPagina(document.getElementById("page1"), document.getElementById("page2"));
+  window.scrollTo({ top: 0 });
+  setTimeout(() => renderDownloadsPage1(), 900);
+}
+
+function voltarPagina1(e) {
+  e.preventDefault(); if (contagemEmAndamento) return;
+  renderDownloadsPage1();
+  trocarPagina(document.getElementById("page2"), document.getElementById("page1"));
+  window.scrollTo({ top: 0 });
+}
+
+progressWrap.addEventListener("click", () => {
+  if (contagemEmAndamento || !downloadAtual) return;
+  if (!linksDownloadAtivos || !linksDownload.length) {
+    progressWrap.classList.remove("waiting");
+    progressWrap.classList.add("running");
+    progressWrap.style.cursor = "default";
+    iniciarContagem();
+    return;
+  }
+  if (!jaAbriuLinkDownload) {
+    const aleatorio = linksDownload[Math.floor(Math.random() * linksDownload.length)];
+    window.open(aleatorio, "_blank");
+    jaAbriuLinkDownload = true;
+    progressLabel.textContent = "Clique novamente";
+    progressWrap.classList.add("waiting");
+  } else {
+    progressWrap.classList.remove("waiting");
+    progressWrap.classList.add("running");
+    progressWrap.style.cursor = "default";
+    iniciarContagem();
+  }
+});
+
+function iniciarContagem() {
+  contagemEmAndamento = true;
+  const segundos = Math.floor(Math.random() * 3) + 5;
+  progressFill.style.transition = "width 0.9s linear";
+  progressFill.style.width = "0%";
+  setTimeout(() => { progressFill.style.width = (100 / segundos) + "%"; }, 50);
+  let passados = 0;
+  const timer = setInterval(() => {
+    passados++;
+    progressFill.style.width = Math.min(100, (passados / segundos) * 100) + "%";
+    const falta = segundos - passados;
+    if (falta > 0) { progressLabel.textContent = \`Aguarde... \${falta}s\`; }
+    else {
+      clearInterval(timer);
+      progressLabel.textContent = "Redirecionando...";
+      setTimeout(() => {
+        window.location.href = downloadAtual.linkFinal;
+        contagemEmAndamento = false; jaAbriuLinkDownload = false;
+        progressFill.style.width = "0%"; progressLabel.textContent = "Download";
+        progressWrap.classList.remove("running"); progressWrap.style.cursor = "pointer";
+      }, 600);
+    }
+  }, 1000);
+}
+
+renderDownloadsPage1();
+<\/script>
+</body>
+</html>`;
+}
+
+function copiarCodigo() {
+  const txt = document.getElementById("codigoSaida");
+  if (!txt.value) { alert("⚠️ Nada pra copiar!"); return; }
+  navigator.clipboard.writeText(txt.value).then(() => alert("✅ Código copiado!"));
+}
+
+function baixarHTML() {
+  const txt = document.getElementById("codigoSaida").value;
+  if (!txt) { alert("⚠️ Nada pra baixar!"); return; }
+  const blob = new Blob([txt], { type: "text/html" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "index.html"; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function visualizarPagina() {
+  const codigo = document.getElementById("codigoSaida").value;
+  if (!codigo) { alert("⚠️ Nada pra visualizar!"); return; }
+  const novaAba = window.open();
+  if (!novaAba) { alert("⚠️ Permita pop-ups!"); return; }
+  novaAba.document.open();
+  novaAba.document.write(codigo);
+  novaAba.document.close();
+}
+
+carregarTema();
+carregarPadroesIdentidade();
+carregarPadroesConteudo();
+carregarDoStorage();
+renderHub();
+</script>
+
+</body>
+</html>
